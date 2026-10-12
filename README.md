@@ -1,182 +1,459 @@
-# Sistem Penjualan dan Persediaan Toko Buku Nala
+<div align="center">
 
-Aplikasi web untuk membantu Toko Buku Nala mengelola katalog, pelanggan, penjualan, dan penerimaan stok dari supplier. Sistem menampilkan ringkasan aktivitas toko dan dapat mencetak struk thermal berukuran 58 mm atau 80 mm.
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                        HEADER BANNER                           -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 
-## Daftar Isi
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24,30&height=200&section=header&text=Toko%20Buku%20Nala&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Sistem%20Penjualan%20dan%20Persediaan&descAlignY=58&descSize=20" width="100%"/>
 
-- [Fitur](#fitur)
-- [Teknologi dan Arsitektur](#teknologi-dan-arsitektur)
-- [Struktur Proyek](#struktur-proyek)
-- [Model Data](#model-data)
-- [Persiapan](#persiapan)
-- [Menjalankan Aplikasi](#menjalankan-aplikasi)
-- [Alur Bisnis](#alur-bisnis)
-- [API Backend](#api-backend)
-- [Keamanan](#keamanan)
-- [Pemecahan Masalah](#pemecahan-masalah)
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                    IDENTITAS MAHASISWA                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 
-## Fitur
+<br/>
 
-### Dashboard
+# 👩‍🎓 NABILA SALSABILA
 
-- Ringkasan omzet dan jumlah transaksi hari ini.
-- Jumlah buku di katalog, total persediaan, serta buku yang perlu di-restok.
-- Buku dengan penjualan tercepat dan buku yang tidak terjual dalam 180 hari.
-- Daftar stok rendah dan transaksi terbaru.
+### `NIM: 12030124140240`
 
-### Katalog Buku
+<br/>
 
-- Menambah dan memperbarui data buku.
-- Menyimpan judul, penulis, penerbit, kategori, harga, stok, batas minimum, dan lokasi gudang.
-- Mencari buku berdasarkan judul atau penulis, serta memfilter berdasarkan kategori.
+<table align="center">
+  <tr>
+    <td align="center" width="50%">
+      <b>📚 Mata Kuliah</b><br/>
+      Pengkodean dan Pemrograman
+    </td>
+    <td align="center" width="50%">
+      <b>🏫 Kelas</b><br/>
+      D
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <b>👨‍🏫 Dosen Pengampu</b><br/>
+      Dr. Totok Dewayanto, S.E., M.Si., Akt., CA
+    </td>
+  </tr>
+</table>
 
-### Pelanggan
+<br/>
 
-- Menambah dan memperbarui nama serta nomor telepon pelanggan.
-- Memilih pelanggan saat membuat transaksi.
+### 🎓 PROGRAM STUDI S1 AKUNTANSI
+#### 🏛️ FAKULTAS EKONOMIKA DAN BISNIS
+##### 🏫 UNIVERSITAS DIPONEGORO
 
-### Penjualan
+<br/>
 
-- Menambahkan beberapa judul dan jumlah buku ke dalam satu transaksi.
-- Memilih metode pembayaran Tunai, Debit, atau QRIS.
-- Menghitung jumlah uang diterima dan kembalian untuk pembayaran tunai.
-- Memvalidasi stok sebelum transaksi disimpan.
-- Menyimpan transaksi dan mengurangi stok secara atomik melalui fungsi PostgreSQL.
-- Mencetak struk dari dialog transaksi berhasil atau dari riwayat penjualan, dalam format 58 mm dan 80 mm.
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                        BADGES SECTION                          -->
+<!-- ═══════════════════════════════════════════════════════ -->
 
-### Penerimaan Supplier
+![Status](https://img.shields.io/badge/STATUS-ACTIVE-success?style=for-the-badge&logo=statuspage&logoColor=white)
+![License](https://img.shields.io/badge/LICENSE-MIT-blue?style=for-the-badge&logo=opensourceinitiative&logoColor=white)
+![Version](https://img.shields.io/badge/VERSION-1.0.0-purple?style=for-the-badge&logo=semver&logoColor=white)
 
-- Mencatat supplier, kontak, lokasi gudang, catatan, jumlah buku, dan harga modal.
-- Menambah stok buku serta menghitung total modal saat penerimaan disimpan.
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-## Teknologi dan Arsitektur
+<br/>
 
-- **Frontend:** HTML, CSS, dan JavaScript tanpa framework.
-- **Database:** PostgreSQL melalui Supabase REST API dan RPC.
-- **Backend opsional:** server HTTP Node.js berbasis modul bawaan (`node:http` dan `fetch`); tidak memerlukan paket npm.
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                     QUICK LINKS SECTION                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
 
-> **Jalur data saat ini:** frontend mengirim permintaan langsung ke Supabase menggunakan konfigurasi di `frontend/supabase-config.js`. `backend/app.js` menyediakan server statis dan endpoint `/api`, tetapi bukan proxy yang digunakan oleh frontend saat ini.
+[![🌐 Live Demo](https://img.shields.io/badge/🌐_LIVE_DEMO-Kunjungi_Website-4CAF50?style=for-the-badge)](https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/)
+[![📂 Repository](https://img.shields.io/badge/📂_REPOSITORY-Lihat_Source_Code-181717?style=for-the-badge&logo=github)](https://github.com/nabilasalsabila056-sudo/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala)
+[![🐛 Report Bug](https://img.shields.io/badge/🐛_LAPOR_BUG-Buka_Issue-red?style=for-the-badge)](https://github.com/nabilasalsabila056-sudo/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/issues)
 
-```text
-Browser (frontend) ── Supabase REST/RPC ── PostgreSQL
-        │
-        └── backend/app.js (opsional: server statis dan endpoint /api)
+</div>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                       TABEL INFORMASI                          -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## 📋 Informasi Proyek
+
+</div>
+
+| 🏷️ Keterangan | 📝 Detail |
+|:---|:---|
+| **📌 Judul Proyek** | Sistem Penjualan dan Persediaan Toko Buku Nala |
+| **🎯 Jenis Proyek** | Aplikasi Web Berbasis Dashboard |
+| **👩‍🎓 Pengembang** | Nabila Salsabila |
+| **🔢 NIM** | 12030124140240 |
+| **📚 Mata Kuliah** | Pengkodean dan Pemrograman |
+| **🏫 Kelas** | D |
+| **👨‍🏫 Dosen Pengampu** | Dr. Totok Dewayanto, S.E., M.Si., Akt., CA |
+| **🎓 Program Studi** | S1 Akuntansi |
+| **🏛️ Fakultas** | Ekonomika dan Bisnis |
+| **🏫 Universitas** | Universitas Diponegoro |
+| **🌐 Demo Website** | [Klik di sini](https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/) |
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                       DESKRIPSI PROYEK                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## 📖 Deskripsi Proyek
+
+</div>
+
+> **Sistem Penjualan dan Persediaan Toko Buku Nala** merupakan aplikasi web berbasis *dashboard* yang dirancang untuk membantu pengelolaan operasional harian Toko Buku Nala. Aplikasi ini memungkinkan pemilik dan operator toko untuk memantau arus kas secara *real-time*, mencatat transaksi penjualan dengan berbagai metode pembayaran, serta mengelola persediaan buku secara efisien.
+
+> Sistem ini dibangun menggunakan **HTML5**, **CSS3**, dan **JavaScript** untuk sisi *frontend*, serta **Supabase** (PostgreSQL) sebagai *backend* dan sistem autentikasi. Dengan antarmuka yang **responsif** dan **intuitif**, aplikasi ini diharapkan dapat meningkatkan efisiensi pencatatan transaksi dan pengelolaan persediaan di Toko Buku Nala.
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                       FITUR UTAMA                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ✨ Fitur Utama
+
+</div>
+
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <h3>📊</h3>
+      <b>Dashboard Ringkasan</b><br/>
+      <sub>Pemasukan, pengeluaran, saldo shift, dan jumlah transaksi</sub>
+    </td>
+    <td align="center" width="25%">
+      <h3>📈</h3>
+      <b>Grafik Arus Kas</b><br/>
+      <sub>Visualisasi 7 atau 14 hari terakhir</sub>
+    </td>
+    <td align="center" width="25%">
+      <h3>💳</h3>
+      <b>Pencatatan Transaksi</b><br/>
+      <sub>Tunai, transfer, kartu, dan QRIS</sub>
+    </td>
+    <td align="center" width="25%">
+      <h3>🔄</h3>
+      <b>Manajemen Shift</b><br/>
+      <sub>Pembukaan & penutupan shift kasir</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <h3>🔍</h3>
+      <b>Pencarian & Filter</b><br/>
+      <sub>Filter transaksi berdasarkan kriteria</sub>
+    </td>
+    <td align="center" width="25%">
+      <h3>🔐</h3>
+      <b>Login Operator</b><br/>
+      <sub>Autentikasi via Supabase Auth</sub>
+    </td>
+    <td align="center" width="25%">
+      <h3>☁️</h3>
+      <b>Penyimpanan Cloud</b><br/>
+      <sub>Data tersimpan aman di Supabase</sub>
+    </td>
+    <td align="center" width="25%">
+      <h3>📱</h3>
+      <b>Responsif</b><br/>
+      <sub>Desktop, tablet, dan smartphone</sub>
+    </td>
+  </tr>
+</table>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                       TEKNOLOGI                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## 🛠️ Teknologi yang Digunakan
+
+</div>
+
+<div align="center">
+
+| 🎨 Frontend | ⚙️ Backend | 🚀 Deployment | 🔧 Tools |
+|:---:|:---:|:---:|:---:|
+| ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white) | ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white) | ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-222222?style=flat-square&logo=githubpages&logoColor=white) | ![Git](https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white) |
+| ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white) | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) | | ![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white) |
+| ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) | | | ![VS Code](https://img.shields.io/badge/VS%20Code-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white) |
+
+</div>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                    STRUKTUR REPOSITORY                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## 📁 Struktur Repository
+
+</div>
+
+```plaintext
+📦 Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/
+│
+├── 📄 index.html              # Halaman utama (dashboard)
+├── 📄 login.html              # Halaman login operator
+│
+├── 📂 css/
+│   └── 🎨 style.css           # Stylesheet utama
+│
+├── 📂 js/
+│   ├── ⚙️ supabase.js         # Konfigurasi Supabase client
+│   ├── 📊 dashboard.js        # Logika dashboard & grafik
+│   ├── 💳 transaksi.js        # Logika pencatatan transaksi
+│   └── 🔄 shift.js            # Logika shift kasir
+│
+├── 📂 assets/
+│   └── 🖼️ images/             # Gambar & aset statis
+│
+├── 🔐 .env.example            # Contoh environment variables
+├── 📜 LICENSE                 # Lisensi proyek
+└── 📖 README.md               # Dokumentasi proyek
 ```
 
-## Struktur Proyek
+---
 
-```text
-.
-├── backend/
-│   ├── app.js                 # Server statis dan API HTTP
-│   └── config.js              # Konfigurasi Supabase dari environment
-├── database/
-│   └── schema.sql             # Skema, migrasi, fungsi, dan kebijakan akses
-├── frontend/
-│   ├── index.html             # Struktur halaman aplikasi
-│   ├── script.js              # Interaksi UI dan integrasi Supabase
-│   ├── style.css              # Gaya aplikasi dan struk cetak
-│   ├── story-characters.svg   # Ilustrasi animasi dashboard
-│   └── supabase-config.js     # URL dan publishable key untuk frontend
-└── README.md
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                   CARA MENJALANKAN LOKAL                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## 🚀 Menjalankan Aplikasi Secara Lokal
+
+</div>
+
+### 📋 Prasyarat
+
+Sebelum memulai, pastikan Anda sudah menginstal:
+
+- ✅ [Git](https://git-scm.com/) — untuk *version control*
+- ✅ [Node.js](https://nodejs.org/) v18+ — untuk *runtime environment*
+- ✅ Akun [Supabase](https://supabase.com/) — untuk *backend* (gratis)
+- ✅ Browser modern (Chrome, Firefox, Edge, atau Safari)
+
+### 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/nabilasalsabila056-sudo/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala.git
+cd Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala
 ```
 
-## Model Data
+### 2️⃣ Install Dependencies
 
-Skema menggunakan empat tabel utama. Detail item penjualan dan penerimaan supplier disimpan sebagai snapshot JSONB agar riwayat tetap memuat judul, jumlah, dan harga saat transaksi terjadi.
-
-| Tabel | Kegunaan |
-| --- | --- |
-| `books` | Katalog dan jumlah persediaan buku. |
-| `customers` | Data pelanggan, termasuk nama dan telepon. |
-| `sales` | Nomor nota, pelanggan, metode pembayaran, total, uang diterima, waktu, dan item JSONB. |
-| `supplier_orders` | Penerimaan supplier, lokasi, total modal, status, dan item JSONB. |
-
-### Fungsi Database
-
-- `record_sale(...)` memeriksa item dan stok, mengunci data buku selama transaksi, mengurangi stok, membuat nomor nota, serta menyimpan item dan pembayaran dalam satu transaksi database.
-- `record_supplier_order(...)` memeriksa item, menambah stok, memperbarui lokasi gudang, dan menyimpan total modal secara atomik.
-
-## Persiapan
-
-1. Siapkan proyek Supabase dan catat URL proyek serta publishable key.
-2. **Cadangkan database sebelum migrasi.** Jalankan `database/schema.sql` melalui SQL Editor Supabase. Skrip memigrasikan detail dari tabel legacy `sale_items` dan `supplier_order_items` ke JSONB, kemudian menghapus tabel legacy tersebut beserta tabel `suppliers` dan `warehouses` setelah data relasinya dipindahkan ke atribut yang dipertahankan.
-3. Atur `frontend/supabase-config.js` dengan URL dan publishable key proyek Supabase yang sama:
-
-   ```js
-   window.NALA_SUPABASE_CONFIG = {
-       url: "https://<project-ref>.supabase.co",
-       publishableKey: "<publishable-key>"
-   };
-   ```
-
-4. Pastikan nilai `SUPABASE_URL` backend menunjuk ke proyek Supabase yang sama dengan konfigurasi frontend.
-
-> Jangan menaruh `service_role` key di frontend atau repository. Key tersebut memiliki hak akses tinggi dan hanya boleh disimpan sebagai environment variable backend.
-
-## Menjalankan Aplikasi
-
-Gunakan Node.js 18 atau yang lebih baru. Tidak ada langkah `npm install` karena backend hanya memakai modul bawaan Node.js.
-
-Di PowerShell, dari direktori root proyek:
-
-```powershell
-$env:SUPABASE_URL = "https://<project-ref>.supabase.co"
-$env:SUPABASE_SERVICE_ROLE_KEY = "<service-role-secret>"
-$env:PORT = "3000"
-node backend/app.js
+```bash
+npm install
+npm install @supabase/supabase-js
 ```
 
-Buka [http://localhost:3000](http://localhost:3000). Port default adalah `3000`; ubah `PORT` jika port tersebut sudah digunakan.
+### 3️⃣ Konfigurasi Environment Variables
 
-Server dapat menyajikan halaman tanpa service-role key, tetapi endpoint backend yang mengakses database akan mengembalikan `503` sampai `SUPABASE_URL` dan `SUPABASE_SERVICE_ROLE_KEY` tersedia. Frontend tetap menggunakan konfigurasi Supabase-nya sendiri.
+Salin file contoh `.env.example` ke `.env`:
 
-## Alur Bisnis
+```bash
+cp .env.example .env
+```
 
-### Penjualan
+Kemudian isi file `.env` dengan kredensial Supabase Anda:
 
-1. Kasir memilih pelanggan (opsional), buku, jumlah, dan metode pembayaran.
-2. Frontend memvalidasi jumlah terhadap stok yang terlihat dan menghitung total serta kembalian.
-3. RPC `record_sale` memvalidasi ulang stok di database, mengurangi stok, dan menyimpan snapshot item serta nominal pembayaran.
-4. Transaksi muncul di riwayat. Struk dapat dicetak dari dialog sukses atau tombol pada baris riwayat.
+```env
+VITE_SUPABASE_URL=https://<project-id>.supabase.co
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
+```
 
-### Penerimaan Supplier
+> 💡 **Cara mendapatkan kredensial:**
+> 1. Login ke [Supabase Dashboard](https://supabase.com/dashboard)
+> 2. Pilih project Anda
+> 3. Buka **Settings → API**
+> 4. Salin **Project URL** dan **anon/public key**
 
-1. Petugas mengisi data supplier, lokasi gudang, serta daftar buku dan harga modal.
-2. RPC `record_supplier_order` mengunci baris buku terkait, menambah stok, dan mencatat penerimaan.
-3. Persediaan dan riwayat penerimaan diperbarui setelah transaksi database berhasil.
+### 4️⃣ Setup Database Supabase
 
-## API Backend
+Jalankan SQL berikut di **SQL Editor** Supabase:
 
-`backend/app.js` menyediakan endpoint berikut ketika server Node.js berjalan:
+```sql
+-- 🗃️ Tabel Transaksi
+CREATE TABLE transaksi (
+  id BIGSERIAL PRIMARY KEY,
+  tanggal TIMESTAMPTZ DEFAULT NOW(),
+  jenis TEXT CHECK (jenis IN ('pemasukan', 'pengeluaran')),
+  metode TEXT CHECK (metode IN ('tunai', 'transfer', 'kartu', 'qris')),
+  jumlah NUMERIC(12, 2) NOT NULL,
+  keterangan TEXT,
+  operator_id UUID REFERENCES auth.users(id)
+);
 
-| Metode | Endpoint | Kegunaan |
-| --- | --- | --- |
-| `GET` | `/api/health` | Status server dan konfigurasi Supabase. |
-| `GET` | `/api/categories` | Daftar kategori dari katalog buku. |
-| `GET` | `/api/books` | Daftar buku. |
-| `POST` | `/api/books` | Menambah buku. |
-| `PATCH` | `/api/books/:id` | Memperbarui buku. |
-| `GET` | `/api/sales` | Mengambil riwayat penjualan. |
-| `POST` | `/api/sales` | Menyimpan penjualan melalui RPC. |
+-- 🔄 Tabel Shift Kasir
+CREATE TABLE shift (
+  id BIGSERIAL PRIMARY KEY,
+  waktu_buka TIMESTAMPTZ DEFAULT NOW(),
+  waktu_tutup TIMESTAMPTZ,
+  saldo_awal NUMERIC(12, 2) NOT NULL,
+  saldo_akhir NUMERIC(12, 2),
+  operator_id UUID REFERENCES auth.users(id),
+  status TEXT DEFAULT 'aktif' CHECK (status IN ('aktif', 'ditutup'))
+);
+```
 
-Frontend saat ini tidak memakai endpoint tersebut untuk mengambil atau mengubah data. Endpoint API ini ditujukan untuk integrasi atau klien lain.
+### 5️⃣ Jalankan Aplikasi
 
-## Keamanan
+```bash
+npm run dev
+```
 
-- Frontend memakai publishable key; akses database tetap harus dibatasi dengan Row Level Security (RLS) yang sesuai.
-- Schema saat ini membuat kebijakan akses untuk role `anon` dan `authenticated` pada beberapa operasi. Tinjau dan persempit kebijakan tersebut sebelum aplikasi digunakan secara publik.
-- Batasi akses jaringan dan jangan mengekspos service-role key melalui browser, file frontend, log, atau Git.
-- Validasi stok dilakukan kembali dalam transaksi PostgreSQL; jangan mengandalkan validasi frontend saja.
+Buka browser dan akses:
 
-## Pemecahan Masalah
+```
+http://localhost:5173
+```
 
-| Gejala | Yang perlu diperiksa |
-| --- | --- |
-| Label koneksi menunjukkan database terputus | Pastikan URL dan publishable key di `frontend/supabase-config.js` benar dan berasal dari proyek yang sama. Periksa juga kebijakan RLS. |
-| Backend mengembalikan `503` | Atur `SUPABASE_URL` dan `SUPABASE_SERVICE_ROLE_KEY` di environment sebelum menjalankan server. |
-| Fungsi `record_sale` tidak ditemukan | Jalankan versi terbaru `database/schema.sql`; fungsi transaksi saat ini menerima enam argumen bernama `p_customer_id`, `p_customer_name`, `p_customer_phone`, `p_payment_method`, `p_amount_received`, dan `p_items`. |
-| Penjualan gagal karena stok | Periksa stok buku; stok dapat berubah setelah halaman dimuat. RPC menolak transaksi yang melebihi stok aktual. |
-| Warna struk tidak tercetak | Aktifkan pencetakan background/color pada dialog cetak browser. Hasil warna juga bergantung pada kemampuan printer; printer thermal monokrom akan mencetaknya dalam grayscale. |
+---
 
-> Catatan kompatibilitas: endpoint backend `GET /api/sales` masih meminta relasi legacy `sale_items`, sedangkan skema saat ini menyimpan detail sebagai JSONB di `sales.items`. Frontend tidak menggunakan endpoint tersebut; sesuaikan query backend sebelum mengandalkannya setelah migrasi.
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                   DEPLOYMENT GITHUB PAGES                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## 🌐 Deployment ke GitHub Pages
+
+</div>
+
+### 📍 Langkah 1: Buka Settings Repository
+
+1. Buka repository di GitHub: [Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala](https://github.com/nabilasalsabila056-sudo/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala)
+2. Klik tab **⚙️ Settings** di bagian atas
+
+### 📍 Langkah 2: Aktifkan GitHub Pages
+
+1. Pada sidebar kiri, scroll ke **Code and automation** → klik **Pages**
+2. Di bawah **Build and deployment**, pilih:
+   - **Source:** `Deploy from a branch`
+   - **Branch:** `main`
+   - **Folder:** `/ (root)`
+3. Klik **Save** 💾
+
+### 📍 Langkah 3: Tunggu Proses Deployment
+
+Pantau progres di tab **Actions**. Proses publikasi memakan waktu 1–5 menit.
+
+### 📍 Langkah 4: Akses Website
+
+Setelah selesai, website dapat diakses di:
+
+```
+https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/
+```
+
+> **⚠️ Catatan Penting**
+>
+> - Pastikan file `index.html` berada di **root** repository
+> - Jika memakai build tool seperti **Vite**, konfigurasi `vite.config.js`:
+>
+> ```js
+> export default defineConfig({
+>   base: '/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/',
+> });
+> ```
+>
+> - Lalu jalankan `npm run build` dan deploy folder `dist/`
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                       SCREENSHOT                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## 📸 Tangkapan Layar
+
+*Berikut beberapa tampilan dari aplikasi Toko Buku Nala:*
+
+<br/>
+
+| 🖥️ Dashboard Utama | 💳 Halaman Transaksi |
+|:---:|:---:|
+| ![Dashboard](assets/images/dashboard.png) | ![Transaksi](assets/images/transaksi.png) |
+| 📊 Ringkasan pemasukan & grafik arus kas | 💰 Pencatatan transaksi penjualan |
+
+</div>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--                        IDENTITAS                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## 👤 Identitas Pengembang
+
+<br/>
+
+<img src="https://avatars.githubusercontent.com/u/0?s=150" alt="Avatar" width="120" style="border-radius: 50%;" />
+
+### **NABILA SALSABILA**
+**NIM: 12030124140240**
+
+<br/>
+
+**Program Studi S1 Akuntansi**  
+**Fakultas Ekonomika dan Bisnis**  
+**Universitas Diponegoro**
+
+<br/>
+
+[![GitHub](https://img.shields.io/badge/GitHub-nabilasalsabila056--sudo-181717?style=for-the-badge&logo=github)](https://github.com/nabilasalsabila056-sudo)
+
+</div>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                        LISENSI                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## 📄 Lisensi
+
+Proyek ini dilisensikan di bawah **MIT License**.  
+Lihat file [LICENSE](LICENSE) untuk informasi lebih lanjut.
+
+</div>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                        FOOTER                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+### ⭐ Jika proyek ini bermanfaat, jangan lupa berikan bintang! ⭐
+
+<br/>
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24,30&height=120&section=footer" width="100%"/>
+
+<sub>Made with ❤️ by <b>Nabila Salsabila</b> · © 2024 · Universitas Diponegoro</sub>
+
+</div>
