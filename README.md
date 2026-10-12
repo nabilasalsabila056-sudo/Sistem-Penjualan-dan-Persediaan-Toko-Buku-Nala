@@ -1,459 +1,226 @@
-<div align="center">
+# SISTEM PENJUALAN DAN PERSEDIAAN TOKO BUKU NALA
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                        HEADER BANNER                           -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
+**NABILA SALSABILA**  
+**NIM: 12030124140240**  
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24,30&height=200&section=header&text=Toko%20Buku%20Nala&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Sistem%20Penjualan%20dan%20Persediaan&descAlignY=58&descSize=20" width="100%"/>
+**Mata Kuliah/Kelas:** Pengkodean dan Pemrograman / D  
+**Dosen Pengampu:** Dr. Totok Dewayanto, S.E., M.Si., Akt., CA  
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                    IDENTITAS MAHASISWA                         -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-<br/>
-
-# 👩‍🎓 NABILA SALSABILA
-
-### `NIM: 12030124140240`
-
-<br/>
-
-<table align="center">
-  <tr>
-    <td align="center" width="50%">
-      <b>📚 Mata Kuliah</b><br/>
-      Pengkodean dan Pemrograman
-    </td>
-    <td align="center" width="50%">
-      <b>🏫 Kelas</b><br/>
-      D
-    </td>
-  </tr>
-  <tr>
-    <td align="center" colspan="2">
-      <b>👨‍🏫 Dosen Pengampu</b><br/>
-      Dr. Totok Dewayanto, S.E., M.Si., Akt., CA
-    </td>
-  </tr>
-</table>
-
-<br/>
-
-### 🎓 PROGRAM STUDI S1 AKUNTANSI
-#### 🏛️ FAKULTAS EKONOMIKA DAN BISNIS
-##### 🏫 UNIVERSITAS DIPONEGORO
-
-<br/>
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                        BADGES SECTION                          -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-![Status](https://img.shields.io/badge/STATUS-ACTIVE-success?style=for-the-badge&logo=statuspage&logoColor=white)
-![License](https://img.shields.io/badge/LICENSE-MIT-blue?style=for-the-badge&logo=opensourceinitiative&logoColor=white)
-![Version](https://img.shields.io/badge/VERSION-1.0.0-purple?style=for-the-badge&logo=semver&logoColor=white)
-
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-
-<br/>
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                     QUICK LINKS SECTION                        -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-[![🌐 Live Demo](https://img.shields.io/badge/🌐_LIVE_DEMO-Kunjungi_Website-4CAF50?style=for-the-badge)](https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/)
-[![📂 Repository](https://img.shields.io/badge/📂_REPOSITORY-Lihat_Source_Code-181717?style=for-the-badge&logo=github)](https://github.com/nabilasalsabila056-sudo/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala)
-[![🐛 Report Bug](https://img.shields.io/badge/🐛_LAPOR_BUG-Buka_Issue-red?style=for-the-badge)](https://github.com/nabilasalsabila056-sudo/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/issues)
-
-</div>
+**PROGRAM STUDI S1 AKUNTANSI**  
+**FAKULTAS EKONOMIKA DAN BISNIS**  
+**UNIVERSITAS DIPONEGORO**  
 
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                       TABEL INFORMASI                          -->
-<!-- ═══════════════════════════════════════════════════════ -->
+## Deskripsi Proyek
 
-<div align="center">
+Toko Buku Nala adalah aplikasi web berbasis dashboard untuk mengelola operasional harian toko buku. Sistem ini memungkinkan pemantauan penjualan, pengelolaan katalog buku, pencatatan pelanggan, serta pemesanan stok ke supplier secara terintegrasi.
 
-## 📋 Informasi Proyek
+Aplikasi dibangun menggunakan HTML5, CSS3, dan JavaScript untuk sisi frontend, serta Supabase (PostgreSQL) sebagai backend penyimpanan data. Sistem berjalan sepenuhnya di sisi klien dan terhubung langsung ke database Supabase melalui API.
 
-</div>
-
-| 🏷️ Keterangan | 📝 Detail |
-|:---|:---|
-| **📌 Judul Proyek** | Sistem Penjualan dan Persediaan Toko Buku Nala |
-| **🎯 Jenis Proyek** | Aplikasi Web Berbasis Dashboard |
-| **👩‍🎓 Pengembang** | Nabila Salsabila |
-| **🔢 NIM** | 12030124140240 |
-| **📚 Mata Kuliah** | Pengkodean dan Pemrograman |
-| **🏫 Kelas** | D |
-| **👨‍🏫 Dosen Pengampu** | Dr. Totok Dewayanto, S.E., M.Si., Akt., CA |
-| **🎓 Program Studi** | S1 Akuntansi |
-| **🏛️ Fakultas** | Ekonomika dan Bisnis |
-| **🏫 Universitas** | Universitas Diponegoro |
-| **🌐 Demo Website** | [Klik di sini](https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/) |
+**Demo Langsung:**  
+https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/
 
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                       DESKRIPSI PROYEK                         -->
-<!-- ═══════════════════════════════════════════════════════ -->
+## Fitur Utama
 
-<div align="center">
-
-## 📖 Deskripsi Proyek
-
-</div>
-
-> **Sistem Penjualan dan Persediaan Toko Buku Nala** merupakan aplikasi web berbasis *dashboard* yang dirancang untuk membantu pengelolaan operasional harian Toko Buku Nala. Aplikasi ini memungkinkan pemilik dan operator toko untuk memantau arus kas secara *real-time*, mencatat transaksi penjualan dengan berbagai metode pembayaran, serta mengelola persediaan buku secara efisien.
-
-> Sistem ini dibangun menggunakan **HTML5**, **CSS3**, dan **JavaScript** untuk sisi *frontend*, serta **Supabase** (PostgreSQL) sebagai *backend* dan sistem autentikasi. Dengan antarmuka yang **responsif** dan **intuitif**, aplikasi ini diharapkan dapat meningkatkan efisiensi pencatatan transaksi dan pengelolaan persediaan di Toko Buku Nala.
+1. **Dashboard Ringkasan:** Menampilkan penjualan hari ini, jumlah transaksi, judul di katalog, total persediaan, prioritas pemesanan ulang, evaluasi dead stock, dan rak yang menipis.
+2. **Manajemen Pelanggan:** Menyimpan dan mengelola data pelanggan untuk dipilih saat transaksi.
+3. **Katalog Buku:** Mengelola judul, penerbit, lokasi stok, kategori, harga, stok, dan status buku.
+4. **Penjualan (Kasir):** Mencatat transaksi baru, menampilkan keranjang buku, total transaksi, kembalian, dan riwayat transaksi.
+5. **Pemesanan Supplier:** Mencatat barang yang diterima dari supplier; stok katalog bertambah otomatis.
+6. **Integrasi Database Real-time:** Sistem menampilkan status koneksi ke PostgreSQL Supabase secara langsung.
 
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                       FITUR UTAMA                              -->
-<!-- ═══════════════════════════════════════════════════════ -->
+## Teknologi yang Digunakan
 
-<div align="center">
-
-## ✨ Fitur Utama
-
-</div>
-
-<table>
-  <tr>
-    <td align="center" width="25%">
-      <h3>📊</h3>
-      <b>Dashboard Ringkasan</b><br/>
-      <sub>Pemasukan, pengeluaran, saldo shift, dan jumlah transaksi</sub>
-    </td>
-    <td align="center" width="25%">
-      <h3>📈</h3>
-      <b>Grafik Arus Kas</b><br/>
-      <sub>Visualisasi 7 atau 14 hari terakhir</sub>
-    </td>
-    <td align="center" width="25%">
-      <h3>💳</h3>
-      <b>Pencatatan Transaksi</b><br/>
-      <sub>Tunai, transfer, kartu, dan QRIS</sub>
-    </td>
-    <td align="center" width="25%">
-      <h3>🔄</h3>
-      <b>Manajemen Shift</b><br/>
-      <sub>Pembukaan & penutupan shift kasir</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="25%">
-      <h3>🔍</h3>
-      <b>Pencarian & Filter</b><br/>
-      <sub>Filter transaksi berdasarkan kriteria</sub>
-    </td>
-    <td align="center" width="25%">
-      <h3>🔐</h3>
-      <b>Login Operator</b><br/>
-      <sub>Autentikasi via Supabase Auth</sub>
-    </td>
-    <td align="center" width="25%">
-      <h3>☁️</h3>
-      <b>Penyimpanan Cloud</b><br/>
-      <sub>Data tersimpan aman di Supabase</sub>
-    </td>
-    <td align="center" width="25%">
-      <h3>📱</h3>
-      <b>Responsif</b><br/>
-      <sub>Desktop, tablet, dan smartphone</sub>
-    </td>
-  </tr>
-</table>
+| Komponen   | Teknologi               |
+|------------|-------------------------|
+| Frontend   | HTML5, CSS3, JavaScript |
+| Backend    | Supabase (PostgreSQL)   |
+| Deployment | GitHub Pages            |
+| Ikon       | Unicode / SVG           |
 
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                       TEKNOLOGI                                -->
-<!-- ═══════════════════════════════════════════════════════ -->
+## Struktur Repository
 
-<div align="center">
-
-## 🛠️ Teknologi yang Digunakan
-
-</div>
-
-<div align="center">
-
-| 🎨 Frontend | ⚙️ Backend | 🚀 Deployment | 🔧 Tools |
-|:---:|:---:|:---:|:---:|
-| ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white) | ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white) | ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-222222?style=flat-square&logo=githubpages&logoColor=white) | ![Git](https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white) |
-| ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white) | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) | | ![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white) |
-| ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) | | | ![VS Code](https://img.shields.io/badge/VS%20Code-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white) |
-
-</div>
-
----
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                    STRUKTUR REPOSITORY                         -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-## 📁 Struktur Repository
-
-</div>
-
-```plaintext
-📦 Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/
+```
+TOKO-BUKU-NALA/
 │
-├── 📄 index.html              # Halaman utama (dashboard)
-├── 📄 login.html              # Halaman login operator
+├── backend/
+│   ├── app.js
+│   └── config.js
 │
-├── 📂 css/
-│   └── 🎨 style.css           # Stylesheet utama
+├── database/
+│   └── schema.sql
 │
-├── 📂 js/
-│   ├── ⚙️ supabase.js         # Konfigurasi Supabase client
-│   ├── 📊 dashboard.js        # Logika dashboard & grafik
-│   ├── 💳 transaksi.js        # Logika pencatatan transaksi
-│   └── 🔄 shift.js            # Logika shift kasir
+├── frontend/
+│   ├── index.html
+│   ├── script.js
+│   ├── story-characters.svg
+│   ├── style.css
+│   └── supabase-config.js
 │
-├── 📂 assets/
-│   └── 🖼️ images/             # Gambar & aset statis
-│
-├── 🔐 .env.example            # Contoh environment variables
-├── 📜 LICENSE                 # Lisensi proyek
-└── 📖 README.md               # Dokumentasi proyek
+└── README.md
 ```
 
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                   CARA MENJALANKAN LOKAL                       -->
-<!-- ═══════════════════════════════════════════════════════ -->
+## Database
 
-<div align="center">
+Sistem ini menggunakan Supabase (PostgreSQL) dengan tabel-tabel berikut:
 
-## 🚀 Menjalankan Aplikasi Secara Lokal
+### 1. Pelanggan
+Menyimpan data pelanggan toko.
 
-</div>
+| Kolom     | Tipe    | Keterangan            |
+|-----------|---------|-----------------------|
+| id        | BIGSERIAL | Primary Key         |
+| nama      | VARCHAR | Nama pelanggan        |
+| telepon   | VARCHAR | Nomor telepon         |
+| terdaftar | TIMESTAMPTZ | Waktu pendaftaran |
 
-### 📋 Prasyarat
+### 2. Buku (Katalog)
+Menyimpan data buku yang dijual.
 
-Sebelum memulai, pastikan Anda sudah menginstal:
+| Kolom     | Tipe      | Keterangan            |
+|-----------|-----------|-----------------------|
+| id        | BIGSERIAL | Primary Key           |
+| judul     | VARCHAR   | Judul buku            |
+| penerbit  | VARCHAR   | Nama penerbit         |
+| lokasi    | VARCHAR   | Lokasi rak            |
+| kategori  | VARCHAR   | Kategori buku         |
+| harga     | NUMERIC   | Harga satuan          |
+| stok      | INTEGER   | Jumlah stok tersedia  |
 
-- ✅ [Git](https://git-scm.com/) — untuk *version control*
-- ✅ [Node.js](https://nodejs.org/) v18+ — untuk *runtime environment*
-- ✅ Akun [Supabase](https://supabase.com/) — untuk *backend* (gratis)
-- ✅ Browser modern (Chrome, Firefox, Edge, atau Safari)
+### 3. Penjualan
+Menyimpan header transaksi penjualan.
 
-### 1️⃣ Clone Repository
+| Kolom     | Tipe      | Keterangan            |
+|-----------|-----------|-----------------------|
+| id        | BIGSERIAL | Primary Key           |
+| tanggal   | TIMESTAMPTZ | Waktu transaksi     |
+| total     | NUMERIC   | Total pembayaran      |
+| pelanggan_id | BIGINT | Foreign Key ke Pelanggan |
 
+### 4. Detail Penjualan
+Menyimpan rincian item yang dibeli dalam satu transaksi.
+
+| Kolom        | Tipe      | Keterangan              |
+|--------------|-----------|-------------------------|
+| id           | BIGSERIAL | Primary Key             |
+| penjualan_id | BIGINT    | Foreign Key ke Penjualan|
+| buku_id      | BIGINT    | Foreign Key ke Buku     |
+| jumlah       | INTEGER   | Jumlah item             |
+| subtotal     | NUMERIC   | Subtotal harga          |
+
+### 5. Pemesanan Supplier
+Mencatat pemesanan barang dari supplier.
+
+| Kolom       | Tipe      | Keterangan            |
+|-------------|-----------|-----------------------|
+| id          | BIGSERIAL | Primary Key           |
+| nomor       | VARCHAR   | Nomor pesanan         |
+| supplier    | VARCHAR   | Nama supplier         |
+| lokasi      | VARCHAR   | Lokasi pengiriman     |
+| item        | TEXT      | Daftar item           |
+| total_modal | NUMERIC   | Total biaya           |
+| diterima    | BOOLEAN   | Status penerimaan     |
+| status      | VARCHAR   | Status pesanan        |
+
+---
+
+## Cara Menjalankan Aplikasi
+
+### Prasyarat
+- Git
+- Node.js v18 atau versi terbaru
+- Akun Supabase
+- Browser modern (Chrome, Firefox, Edge, atau Safari)
+
+### Langkah 1: Clone Repository
 ```bash
 git clone https://github.com/nabilasalsabila056-sudo/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala.git
 cd Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala
 ```
 
-### 2️⃣ Install Dependencies
-
+### Langkah 2: Install Dependencies
 ```bash
 npm install
 npm install @supabase/supabase-js
 ```
 
-### 3️⃣ Konfigurasi Environment Variables
-
+### Langkah 3: Konfigurasi Environment Variables
 Salin file contoh `.env.example` ke `.env`:
-
 ```bash
 cp .env.example .env
 ```
-
-Kemudian isi file `.env` dengan kredensial Supabase Anda:
-
+Isi file `.env` dengan kredensial Supabase Anda:
 ```env
-VITE_SUPABASE_URL=https://<project-id>.supabase.co
-VITE_SUPABASE_ANON_KEY=<your-anon-key>
+VITE_SUPABASE_URL=https://<project-anda>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key-anda>
 ```
+Cara mendapatkan kredensial:
+1. Login ke Supabase Dashboard.
+2. Pilih project Anda.
+3. Buka Settings lalu API.
+4. Salin Project URL dan anon/public key.
 
-> 💡 **Cara mendapatkan kredensial:**
-> 1. Login ke [Supabase Dashboard](https://supabase.com/dashboard)
-> 2. Pilih project Anda
-> 3. Buka **Settings → API**
-> 4. Salin **Project URL** dan **anon/public key**
+### Langkah 4: Setup Database Supabase
+Jalankan perintah SQL yang terdapat pada file `database/schema.sql` di dalam SQL Editor Supabase untuk membuat tabel yang diperlukan.
 
-### 4️⃣ Setup Database Supabase
-
-Jalankan SQL berikut di **SQL Editor** Supabase:
-
-```sql
--- 🗃️ Tabel Transaksi
-CREATE TABLE transaksi (
-  id BIGSERIAL PRIMARY KEY,
-  tanggal TIMESTAMPTZ DEFAULT NOW(),
-  jenis TEXT CHECK (jenis IN ('pemasukan', 'pengeluaran')),
-  metode TEXT CHECK (metode IN ('tunai', 'transfer', 'kartu', 'qris')),
-  jumlah NUMERIC(12, 2) NOT NULL,
-  keterangan TEXT,
-  operator_id UUID REFERENCES auth.users(id)
-);
-
--- 🔄 Tabel Shift Kasir
-CREATE TABLE shift (
-  id BIGSERIAL PRIMARY KEY,
-  waktu_buka TIMESTAMPTZ DEFAULT NOW(),
-  waktu_tutup TIMESTAMPTZ,
-  saldo_awal NUMERIC(12, 2) NOT NULL,
-  saldo_akhir NUMERIC(12, 2),
-  operator_id UUID REFERENCES auth.users(id),
-  status TEXT DEFAULT 'aktif' CHECK (status IN ('aktif', 'ditutup'))
-);
-```
-
-### 5️⃣ Jalankan Aplikasi
-
+### Langkah 5: Menjalankan Aplikasi
 ```bash
 npm run dev
 ```
-
-Buka browser dan akses:
-
-```
-http://localhost:5173
-```
+Buka browser dan akses `http://localhost:5173`.
 
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                   DEPLOYMENT GITHUB PAGES                      -->
-<!-- ═══════════════════════════════════════════════════════ -->
+## Deployment ke GitHub Pages
 
-<div align="center">
+1. Buka repository di GitHub.
+2. Klik tab **Settings**.
+3. Pada sidebar kiri, pilih **Pages**.
+4. Di bawah **Build and deployment**, pilih Source: `Deploy from a branch`.
+5. Pilih Branch: `main` dan Folder: `/ (root)`.
+6. Klik **Save**.
+7. Tunggu proses deployment selesai (1-5 menit).
+8. Website dapat diakses di:
+   `https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/`
 
-## 🌐 Deployment ke GitHub Pages
-
-</div>
-
-### 📍 Langkah 1: Buka Settings Repository
-
-1. Buka repository di GitHub: [Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala](https://github.com/nabilasalsabila056-sudo/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala)
-2. Klik tab **⚙️ Settings** di bagian atas
-
-### 📍 Langkah 2: Aktifkan GitHub Pages
-
-1. Pada sidebar kiri, scroll ke **Code and automation** → klik **Pages**
-2. Di bawah **Build and deployment**, pilih:
-   - **Source:** `Deploy from a branch`
-   - **Branch:** `main`
-   - **Folder:** `/ (root)`
-3. Klik **Save** 💾
-
-### 📍 Langkah 3: Tunggu Proses Deployment
-
-Pantau progres di tab **Actions**. Proses publikasi memakan waktu 1–5 menit.
-
-### 📍 Langkah 4: Akses Website
-
-Setelah selesai, website dapat diakses di:
-
-```
-https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/
-```
-
-> **⚠️ Catatan Penting**
->
-> - Pastikan file `index.html` berada di **root** repository
-> - Jika memakai build tool seperti **Vite**, konfigurasi `vite.config.js`:
->
-> ```js
-> export default defineConfig({
->   base: '/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/',
-> });
-> ```
->
-> - Lalu jalankan `npm run build` dan deploy folder `dist/`
+Catatan: Pastikan file `index.html` berada di root repository. Jika menggunakan build tool seperti Vite, pastikan konfigurasi `base` di `vite.config.js` sudah disesuaikan dengan nama repository.
 
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                       SCREENSHOT                               -->
-<!-- ═══════════════════════════════════════════════════════ -->
+## Alur Transaksi
 
-<div align="center">
-
-## 📸 Tangkapan Layar
-
-*Berikut beberapa tampilan dari aplikasi Toko Buku Nala:*
-
-<br/>
-
-| 🖥️ Dashboard Utama | 💳 Halaman Transaksi |
-|:---:|:---:|
-| ![Dashboard](assets/images/dashboard.png) | ![Transaksi](assets/images/transaksi.png) |
-| 📊 Ringkasan pemasukan & grafik arus kas | 💰 Pencatatan transaksi penjualan |
-
-</div>
+1. **Pilih Pelanggan:** Kasir memilih pelanggan dari daftar yang tersedia (jika ada).
+2. **Input Transaksi:** Kasir menambahkan buku ke keranjang dengan memilih judul dan jumlah.
+3. **Validasi Stok:** Sistem memeriksa ketersediaan stok buku secara otomatis.
+4. **Pemilihan Pembayaran:** Sistem menghitung total transaksi dan kembalian.
+5. **Penyimpanan Data:** Sistem menyimpan data penjualan dan detail penjualan ke database.
+6. **Update Stok:** Stok buku berkurang secara otomatis setelah transaksi berhasil.
+7. **Riwayat Transaksi:** Transaksi yang tersimpan muncul di arsip riwayat penjualan.
 
 ---
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!--                        IDENTITAS                               -->
-<!-- ═══════════════════════════════════════════════════════ -->
+## Palet Warna Sistem
 
-<div align="center">
+Berdasarkan tampilan sistem yang berjalan, aplikasi menggunakan palet warna berikut:
 
-## 👤 Identitas Pengembang
-
-<br/>
-
-<img src="https://avatars.githubusercontent.com/u/0?s=150" alt="Avatar" width="120" style="border-radius: 50%;" />
-
-### **NABILA SALSABILA**
-**NIM: 12030124140240**
-
-<br/>
-
-**Program Studi S1 Akuntansi**  
-**Fakultas Ekonomika dan Bisnis**  
-**Universitas Diponegoro**
-
-<br/>
-
-[![GitHub](https://img.shields.io/badge/GitHub-nabilasalsabila056--sudo-181717?style=for-the-badge&logo=github)](https://github.com/nabilasalsabila056-sudo)
-
-</div>
+| Warna         | Kode Hex  | Penggunaan                |
+|---------------|-----------|---------------------------|
+| Kuning Kertas | `#ffee9d` | Latar belakang utama      |
+| Hijau Zaitun  | `#606c38` | Warna teks & elemen utama |
+| Hijau Sage    | `#adc178` | Garis & aksen             |
+| Merah Coral   | `#d81159` | Tombol aksi & highlight   |
+| Coral Muda    | `#ffa3a5` | Aksen sekunder            |
 
 ---
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                        LISENSI                                 -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-## 📄 Lisensi
-
-Proyek ini dilisensikan di bawah **MIT License**.  
-Lihat file [LICENSE](LICENSE) untuk informasi lebih lanjut.
-
-</div>
-
----
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--                        FOOTER                                  -->
-<!-- ═══════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-### ⭐ Jika proyek ini bermanfaat, jangan lupa berikan bintang! ⭐
-
-<br/>
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24,30&height=120&section=footer" width="100%"/>
-
-<sub>Made with ❤️ by <b>Nabila Salsabila</b> · © 2024 · Universitas Diponegoro</sub>
-
-</div>
+**Dibuat oleh Nabila Salsabila**  
+© 2026 - Universitas Diponegoro
