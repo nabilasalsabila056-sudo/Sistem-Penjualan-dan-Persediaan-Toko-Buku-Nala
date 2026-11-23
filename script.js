@@ -3,7 +3,8 @@ const state = {
     books: [],
     sales: [],
     customers: [],
-    supplierOrders: [],
+    journalEntries: [],
+    conditionEvents: [],
     connected: false
 };
 const defaultCategories = [
@@ -14,6 +15,14 @@ const defaultCategories = [
 const money = value => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(value) || 0);
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
 let toastTimer;
+let pendingDelete = null;
+
+function openDeleteConfirmation({ title, copy, onConfirm }) {
+    pendingDelete = onConfirm;
+    document.getElementById("confirmDialogTitle").textContent = title;
+    document.getElementById("confirmDialogCopy").textContent = copy;
+    document.getElementById("confirmDialog").showModal();
+}
 
 function showToast(message) {
     const toast = document.getElementById("toast");
@@ -29,7 +38,7 @@ async function api(path, options = {}) {
         throw new Error("Konfigurasi PostgreSQL Supabase belum tersedia.");
     }
 
-    const method = options.method || "GET";
+    let method = options.method || "GET";
     let endpoint = path.replace(/^\//, "");
     let body = options.body ? JSON.parse(options.body) : undefined;
 
@@ -37,16 +46,34 @@ async function api(path, options = {}) {
         endpoint = "books?select=book_id,isbn,title,author,publisher,category,price,stock,min_stock,is_active,warehouse_location&is_active=eq.true&order=title.asc";
     } else if (path === "/customers" && method === "GET") {
         endpoint = "customers?select=*&order=name.asc";
-    } else if (path === "/supplier-orders" && method === "GET") {
-        endpoint = "supplier_orders?select=*&order=received_at.desc";
-    } else if (path === "/supplier-orders" && method === "POST") {
-        endpoint = "rpc/record_supplier_order";
+    } else if (path === "/journal-entries" && method === "GET") {
+        endpoint = "journal_entries?select=*&order=entry_date.desc";
+    } else if (path === "/journal-revisions" && method === "POST") {
+        endpoint = "rpc/revise_journal_amount";
         body = {
-            p_supplier_name: body.supplier_name,
-            p_supplier_contact: body.supplier_contact || null,
-            p_warehouse_location: body.warehouse_location,
+            p_journal_entry_id: body.journal_entry_id,
+            p_new_amount: body.new_amount,
+            p_revision_note: body.revision_note || null
+        };
+    } else if (path === "/book-condition-events" && method === "GET") {
+        endpoint = "book_condition_events?select=*,books(title)&order=occurred_at.desc";
+    } else if (path === "/stock-adjustments" && method === "POST") {
+        endpoint = "rpc/record_stock_adjustment";
+        body = {
+            p_adjustment_type: body.adjustment_type,
+            p_supplier_name: body.supplier_name || null,
+            p_warehouse_location: body.warehouse_location || null,
+            p_credit_account: body.credit_account || null,
             p_notes: body.notes || null,
             p_items: body.items
+        };
+    } else if (path === "/journal-entries" && method === "POST") {
+        endpoint = "rpc/record_financial_activity";
+        body = {
+            p_activity_type: body.activity_type,
+            p_description: body.description,
+            p_amount: body.amount,
+            p_entry_date: body.entry_date
         };
     } else if (path === "/customers" && method === "POST") {
         body = { name: body.name.trim(), phone: body.phone?.trim() || null };
@@ -64,6 +91,15 @@ async function api(path, options = {}) {
         };
     } else if (path === "/books" && method === "POST") {
         body = bookDatabasePayload(body);
+    } else if (method === "DELETE" && /^\/customers\/[^/]+$/.test(path)) {
+        const customerId = path.split("/").pop();
+        endpoint = `customers?customer_id=eq.${encodeURIComponent(customerId)}`;
+        body = undefined;
+    } else if (method === "DELETE" && /^\/journal-entries\/[^/]+$/.test(path)) {
+        const journalId = path.split("/").pop();
+        method = "POST";
+        endpoint = "rpc/delete_journal_entry";
+        body = { p_journal_entry_id: Number(journalId) };
     } else {
         const bookMatch = path.match(/^\/books\/([^/]+)$/);
         if (bookMatch && method === "PATCH") {
@@ -113,7 +149,7 @@ function bookDatabasePayload(book) {
         publisher: book.publisher?.trim() || null,
         category: book.category_id || null,
         price: Number(book.price),
-        stock: Number(book.stock),
+        ...(book.stock === undefined ? {} : { stock: Number(book.stock) }),
         min_stock: Number(book.minimum_stock),
         warehouse_location: book.warehouse_location?.trim() || null,
         is_active: true
@@ -122,11 +158,11 @@ function bookDatabasePayload(book) {
 
 async function loadData({ quiet = false } = {}) {
     try {
-        const [books, sales, customers, supplierOrders] = await Promise.all([
-            api("/books"), fetchSalesHistory(), api("/customers"), api("/supplier-orders")
+        const [books, sales, customers, journalEntries] = await Promise.all([
+            api("/books"), fetchSalesHistory(), api("/customers"), api("/journal-entries")
         ]);
         state.customers = customers;
-        state.supplierOrders = supplierOrders;
+        state.journalEntries = journalEntries;
         state.books = books.map(book => ({
             ...book,
             id: book.book_id,
@@ -135,14 +171,47 @@ async function loadData({ quiet = false } = {}) {
         }));
         state.categories = [...new Set(state.books.map(book => book.category).filter(Boolean))]
             .map(name => ({ id: name, name }));
+
+        let conditionEvents = [];
+        try {
+            conditionEvents = await api("/book-condition-events");
+        } catch (error) {
+            conditionEvents = [];
+        }
+
+        if (!conditionEvents.length) {
+            conditionEvents = state.journalEntries
+                .filter(entry => entry.entry_type === "damaged" || entry.entry_type === "lost")
+                .flatMap(entry => (Array.isArray(entry.items) ? entry.items : []).map(item => ({
+                    condition_event_id: `journal-${entry.journal_entry_id}-${item.book_id}`,
+                    book_id: item.book_id,
+                    condition_type: entry.entry_type,
+                    quantity: Number(item.quantity) || 0,
+                    notes: entry.description.includes(": ") ? entry.description.split(": ").slice(1).join(": ").trim() : null,
+                    occurred_at: entry.entry_date,
+                    book_title: item.title || state.books.find(book => String(book.id) === String(item.book_id))?.title || "Buku"
+                })));
+        }
+
+        state.conditionEvents = conditionEvents.map(event => {
+            const linkedEntry = state.journalEntries.find(entry => String(entry.journal_entry_id) === String(event.journal_entry_id));
+            let updateNote = event.notes;
+            if (linkedEntry?.description) {
+                updateNote = linkedEntry.description.includes(": ")
+                    ? linkedEntry.description.split(": ").slice(1).join(": ").trim()
+                    : null;
+            }
+            return {
+                ...event,
+                notes: updateNote,
+                book_title: event.books?.title || event.book_title || state.books.find(book => String(book.id) === String(event.book_id))?.title || "Buku"
+            };
+        });
+
         state.sales = sales.map(sale => ({
             ...sale,
-            customer_name: sale.customers?.name || "Pelanggan umum",
+            customer_name: sale.customer_name || sale.customers?.name || "Pelanggan umum",
             sale_items: (Array.isArray(sale.items) ? sale.items : []).map(item => ({ ...item, books: { title: item.title } }))
-        }));
-        state.supplierOrders = supplierOrders.map(order => ({
-            ...order,
-            supplier_order_items: (Array.isArray(order.items) ? order.items : []).map(item => ({ ...item, books: { title: item.title } }))
         }));
         state.connected = true;
         document.getElementById("connectionLabel").textContent = "PostgreSQL aktif";
@@ -151,7 +220,8 @@ async function loadData({ quiet = false } = {}) {
         state.books = [];
         state.sales = [];
         state.customers = [];
-        state.supplierOrders = [];
+        state.journalEntries = [];
+        state.conditionEvents = [];
         state.connected = false;
         document.getElementById("connectionLabel").textContent = "Database terputus";
         if (!quiet) showToast(`Tidak dapat memuat PostgreSQL: ${error.message}`);
@@ -167,37 +237,13 @@ function formatDate(value, withTime = false) {
     return new Intl.DateTimeFormat("id-ID", withTime ? { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
 }
 
-function receiptMarkup(sale) {
-    const items = sale.sale_items || [];
-    const amountReceived = Number(sale.amount_received ?? sale.total);
-    const change = Math.max(0, amountReceived - Number(sale.total));
-    const soldAt = new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date(sale.sold_at));
-    return `<div class="receipt-paper" data-width="${document.getElementById("receiptWidth").value}">
-        <header class="receipt-header"><div class="receipt-stamp"><strong>n.</strong><span>NALA</span></div><strong>TOKO BUKU NALA</strong><span>Bandung, Jawa Barat</span><span>Telp. 085712345432</span></header>
-        <div class="receipt-rule"></div><div class="receipt-meta"><span>${escapeHtml(soldAt)}</span><span>No. Nota: ${escapeHtml(sale.receipt_number)}</span></div>
-        <div class="receipt-customer">Pelanggan: <strong>${escapeHtml(sale.customer_name || "Pelanggan umum")}</strong></div>
-        <div class="receipt-rule"></div><table class="receipt-items"><thead><tr><th>Nama Buku</th><th>Qty</th><th>Harga</th><th>Subtotal</th></tr></thead><tbody>${items.map(item => {
-            const title = item.books?.title || item.title || state.books.find(book => String(book.id) === String(item.book_id))?.title || "Buku";
-            const quantity = Number(item.quantity) || 0;
-            const unitPrice = Number(item.unit_price) || 0;
-            return `<tr><td>${escapeHtml(title)}</td><td>${quantity}</td><td>${money(unitPrice)}</td><td>${money(quantity * unitPrice)}</td></tr>`;
-        }).join("")}</tbody></table>
-        <div class="receipt-rule"></div><div class="receipt-summary"><div><span>Total Pembayaran</span><strong>${money(sale.total)}</strong></div><div><span>${escapeHtml(sale.payment_method)} dibayar</span><strong>${money(amountReceived)}</strong></div><div><span>Kembalian</span><strong>${money(change)}</strong></div></div>
-        <div class="receipt-rule"></div><footer class="receipt-footer"><span>Setiap lembar adalah awal perjalanan.</span><span>Terima kasih telah memberi rumah bagi kisah-kisah ini.</span><strong>Selamat Membaca 📖</strong></footer>
-    </div>`;
-}
-
-function printSaleReceipt(sale) {
-    document.getElementById("printReceipt").innerHTML = receiptMarkup(sale);
-    window.print();
-}
-
 function renderAll() {
     renderDashboard();
     renderBooks();
     renderSales();
     renderCustomers();
-    renderSupplierOrders();
+    renderJournalEntries();
+    renderConditionEvents();
     renderCategoryOptions();
     renderCustomerOptions();
     renderSaleItems();
@@ -288,11 +334,76 @@ function renderBooks() {
     }).join("") : `<tr><td colspan="8"><div class="empty-state">Tidak ada buku yang cocok dengan pencarian.</div></td></tr>`;
 }
 
+function renderConditionEvents() {
+    const events = state.conditionEvents.filter(event => event.condition_type === "damaged" || event.condition_type === "lost");
+    document.getElementById("conditionCount").textContent = events.length;
+    document.getElementById("conditionBookList").innerHTML = events.length
+        ? events.map((event, index) => {
+            const label = event.condition_type === "damaged" ? "Rusak" : "Hilang";
+            const title = event.book_title || event.books?.title || state.books.find(book => String(book.id) === String(event.book_id))?.title || "Buku";
+            return `<article class="condition-row"><span class="condition-index">${String(index + 1).padStart(2, "0")}</span><div><strong>${escapeHtml(title)}</strong><small>${formatDate(event.occurred_at, true)}${event.notes ? ` · ${escapeHtml(event.notes)}` : ""}</small></div><span class="condition-badge ${event.condition_type}">${label}</span><strong>${Number(event.quantity)} buku</strong></article>`;
+        }).join("")
+        : `<div class="empty-state">Belum ada buku rusak atau hilang yang tercatat.</div>`;
+}
+
 function renderSales() {
     const sales = [...state.sales].sort((a, b) => new Date(b.sold_at) - new Date(a.sold_at));
     document.getElementById("salesCount").textContent = sales.length;
     document.getElementById("salesHistory").innerHTML = sales.length ? sales.map(sale => `
-        <article class="history-row"><div><span class="overline">${escapeHtml(sale.receipt_number)}</span><small>${escapeHtml(sale.customer_name || "Pelanggan umum")} · ${escapeHtml(sale.payment_method)}</small></div><strong>${money(sale.total)}</strong><div class="history-items">${escapeHtml(saleBookTitles(sale))} · ${formatDate(sale.sold_at, true)}</div><button type="button" class="receipt-action" data-print-sale="${escapeHtml(sale.receipt_number)}" aria-label="Cetak struk ${escapeHtml(sale.receipt_number)}" title="Cetak struk"><span aria-hidden="true">⎙</span> Cetak</button></article>`).join("") : `<div class="empty-state">Transaksi yang disimpan akan muncul di sini.</div>`;
+        <article class="history-row">
+            <div class="history-date"><strong>${new Intl.DateTimeFormat("id-ID", { day: "2-digit" }).format(new Date(sale.sold_at))}</strong><span>${new Intl.DateTimeFormat("id-ID", { month: "short" }).format(new Date(sale.sold_at))}</span></div>
+            <div class="history-main"><span class="history-receipt">${escapeHtml(sale.receipt_number)}</span><span class="history-customer">${escapeHtml(sale.customer_name || "Pelanggan umum")}</span><small class="history-meta">${escapeHtml(sale.payment_method)} · ${formatDate(sale.sold_at, true)}</small><p class="history-items">${escapeHtml(saleBookTitles(sale))}</p></div>
+            <div class="history-side"><strong>${money(sale.total)}</strong><button class="table-action print-sale" type="button" data-print-sale="${sale.sale_id}" aria-label="Cetak struk ${escapeHtml(sale.receipt_number)}">Cetak struk</button></div>
+        </article>`).join("") : `<div class="empty-state">Transaksi yang disimpan akan muncul di sini.</div>`;
+}
+
+function printSale(sale) {
+    const paperWidth = [58, 80].includes(Number(document.getElementById("receiptPaperWidth").value))
+        ? Number(document.getElementById("receiptPaperWidth").value)
+        : 80;
+    const lines = (sale.sale_items || []).map(item => {
+        const title = item.books?.title || item.title || "Buku";
+        const quantity = Number(item.quantity) || 0;
+        const unitPrice = Number(item.unit_price) || 0;
+        return `<tr><td class="item-name">${escapeHtml(title)}<small>${quantity} × ${money(unitPrice)}</small></td><td class="item-total">${money(quantity * unitPrice)}</td></tr>`;
+    }).join("");
+    const receiptWindow = window.open("", "_blank", "width=420,height=700");
+    if (!receiptWindow) {
+        showToast("Jendela cetak diblokir browser. Izinkan pop-up lalu coba lagi.");
+        return;
+    }
+    receiptWindow.document.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Struk ${escapeHtml(sale.receipt_number)}</title><style>
+        :root{color-scheme:light;--paper:#ffee9d;--ink:#606c38;--line:#adc178;--coral:#d81159;--pink:#ffa3a5}
+        *{box-sizing:border-box}
+        @page{size:${paperWidth}mm auto;margin:4mm}
+        body{width:${paperWidth - 8}mm;max-width:100%;margin:12px auto;padding:16px 12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:11px/1.5 "Segoe UI",Arial,sans-serif}
+        .receipt-brand{display:flex;align-items:center;justify-content:center;gap:10px;padding:4px 0 12px}
+        .logo-stamp{display:grid;width:44px;height:44px;flex:0 0 44px;place-items:center;border:3px double var(--coral);border-radius:50%;background:var(--paper);color:var(--coral);font:700 22px Georgia,serif;outline:1px dashed var(--coral);outline-offset:3px}
+        .brand-copy strong{display:block;color:var(--forest,var(--ink));font:700 15px Georgia,serif;letter-spacing:1px}
+        .brand-copy small{display:block;margin-top:2px;color:var(--ink);font-size:9px;letter-spacing:.8px}
+        .rule{height:0;margin:8px 0;border:0;border-top:1px dashed var(--line)}
+        .receipt-meta{display:grid;grid-template-columns:1fr auto;gap:3px 8px;font-size:10px}
+        .receipt-meta strong{text-align:right;font-weight:600}
+        table{width:100%;border-collapse:collapse}
+        td{padding:5px 0;vertical-align:top}
+        .item-name{padding-right:7px}
+        .item-name small{display:block;margin-top:2px;color:var(--ink);font-size:9px}
+        .item-total{text-align:right;white-space:nowrap}
+        .summary td{padding:3px 0}
+        .summary td:last-child{text-align:right;white-space:nowrap}
+        .grand-total td{padding-top:7px;border-top:1px solid var(--line);color:var(--coral);font-weight:700;font-size:13px}
+        .thanks{margin:12px 0 2px;color:var(--ink);font:italic 12px Georgia,serif;text-align:center}
+        @media screen{body{min-height:180px;border-radius:8px;box-shadow:0 8px 28px #606c3826}}
+        @media print{body{margin:0 auto;padding:8px 5px;border:0;background:var(--paper);print-color-adjust:exact;-webkit-print-color-adjust:exact}.logo-stamp{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+    </style></head><body>
+        <header class="receipt-brand"><span class="logo-stamp" aria-label="Stempel logo Nala">n.</span><span class="brand-copy"><strong>TOKO BUKU NALA</strong><small>BUKU YANG BAIK MENEMUKAN PEMBACANYA</small></span></header>
+        <hr class="rule">
+        <div class="receipt-meta"><span>No. transaksi</span><strong>${escapeHtml(sale.receipt_number)}</strong><span>Tanggal</span><strong>${escapeHtml(formatDate(sale.sold_at, true))}</strong><span>Pelanggan</span><strong>${escapeHtml(sale.customer_name || "Pelanggan umum")}</strong></div>
+        <hr class="rule"><table>${lines}</table><hr class="rule">
+        <table class="summary"><tr class="grand-total"><td>Total</td><td>${money(sale.total)}</td></tr><tr><td>Pembayaran (${escapeHtml(sale.payment_method)})</td><td>${money(sale.amount_received ?? sale.total)}</td></tr><tr><td>Kembalian</td><td>${money(Math.max(0, Number(sale.amount_received ?? sale.total) - Number(sale.total)))}</td></tr></table>
+        <hr class="rule"><p class="thanks">Terima kasih telah berbelanja</p>
+        <script>window.onload=()=>window.print();window.onafterprint=()=>window.close();</script></body></html>`);
+    receiptWindow.document.close();
 }
 
 function renderCategoryOptions() {
@@ -317,19 +428,42 @@ function renderCustomerOptions() {
 function renderCustomers() {
     const body = document.getElementById("customersTable");
     body.innerHTML = state.customers.length
-        ? state.customers.map(customer => `<tr><td><strong>${escapeHtml(customer.name)}</strong></td><td>${escapeHtml(customer.phone || "-")}</td><td>${formatDate(customer.created_at)}</td><td><button class="table-action" type="button" data-edit-customer="${customer.customer_id}">Ubah</button></td></tr>`).join("")
+        ? state.customers.map(customer => `<tr><td><strong>${escapeHtml(customer.name)}</strong></td><td>${escapeHtml(customer.phone || "-")}</td><td>${formatDate(customer.created_at)}</td><td><div class="row-actions"><button class="table-action" type="button" data-edit-customer="${customer.customer_id}">Ubah</button><button class="table-action table-action-danger" type="button" data-delete-customer="${customer.customer_id}" data-customer-name="${escapeHtml(customer.name)}">Hapus</button></div></td></tr>`).join("")
         : `<tr><td colspan="4"><div class="empty-state">Belum ada data pelanggan.</div></td></tr>`;
 }
 
-function renderSupplierOrders() {
-    const body = document.getElementById("supplierOrdersTable");
-    body.innerHTML = state.supplierOrders.length
-        ? state.supplierOrders.map(order => {
-            const itemCount = (order.supplier_order_items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-            const items = (order.supplier_order_items || []).map(item => `${item.books?.title || "Buku"} × ${item.quantity}`).join(", ");
-            return `<tr><td><strong>${escapeHtml(order.order_number)}</strong><small class="table-subline">${escapeHtml(items)}</small></td><td>${escapeHtml(order.supplier_name)}</td><td>${escapeHtml(order.warehouse_location)}</td><td>${itemCount} buku</td><td>${money(order.total_cost)}</td><td>${formatDate(order.received_at)}</td><td><span class="status ready">${escapeHtml(order.status)}</span></td></tr>`;
+function renderJournalEntries() {
+    const body = document.getElementById("journalEntriesTable");
+    const filter = document.getElementById("journalTypeFilter")?.value || "all";
+    const typeLabels = { sale: "Penjualan", purchase: "Pembelian Persediaan", restock: "Pembelian Persediaan", damaged: "Buku rusak", lost: "Buku hilang", income: "Pemasukan lain", expense: "Pengeluaran" };
+    const entriesByMonth = new Map();
+    const filteredEntries = filter === "all"
+        ? state.journalEntries
+        : state.journalEntries.filter(entry => entry.entry_type === filter || (filter === "purchase" && entry.entry_type === "restock"));
+    document.getElementById("journalFilterCount").textContent = `${filteredEntries.length} entri`;
+    [...filteredEntries]
+        .sort((a, b) => new Date(b.entry_date) - new Date(a.entry_date))
+        .forEach(entry => {
+            const date = new Date(entry.entry_date);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+            if (!entriesByMonth.has(monthKey)) entriesByMonth.set(monthKey, { date, entries: [] });
+            entriesByMonth.get(monthKey).entries.push(entry);
+        });
+    body.innerHTML = filteredEntries.length
+        ? [...entriesByMonth.values()].map(({ date, entries }) => {
+            const monthLabel = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(date);
+            const heading = monthLabel.charAt(0).toLocaleUpperCase("id") + monthLabel.slice(1);
+            return `<tr class="journal-month-divider"><th colspan="6" scope="rowgroup">${escapeHtml(heading)}</th></tr>${entries.map(entry => {
+                const items = (Array.isArray(entry.items) ? entry.items : [])
+                    .map(item => `${item.title || "Buku"} × ${item.quantity}`)
+                    .join(", ");
+                const revision = Number(entry.revision_count) > 0
+                    ? `<small class="revision-meta">Direvisi ${entry.revision_count}×${entry.revision_note ? ` · ${escapeHtml(entry.revision_note)}` : ""}${entry.original_amount != null ? ` · Asal ${money(entry.original_amount)}` : ""}</small>`
+                    : "";
+                return `<tr><td>${formatDate(entry.entry_date)}</td><td><strong>${escapeHtml(entry.entry_number)}</strong></td><td><strong>${escapeHtml(typeLabels[entry.entry_type] || entry.entry_type)}</strong><small class="table-subline">${escapeHtml(entry.description)}${items ? ` · ${escapeHtml(items)}` : ""}</small>${revision}</td><td>${escapeHtml(entry.debit_account)}</td><td>${escapeHtml(entry.credit_account)}</td><td><strong>${money(entry.amount)}</strong><div class="journal-row-actions"><button type="button" class="table-action revise-journal" data-revise-journal="${entry.journal_entry_id}">Revisi nominal</button><button type="button" class="table-action table-action-danger" data-delete-journal="${entry.journal_entry_id}" data-journal-number="${escapeHtml(entry.entry_number)}">Hapus</button></div></td></tr>`;
+            }).join("")}`;
         }).join("")
-        : `<tr><td colspan="7"><div class="empty-state">Belum ada penerimaan supplier.</div></td></tr>`;
+        : `<tr><td colspan="6"><div class="empty-state">Tidak ada jurnal untuk jenis aktivitas yang dipilih.</div></td></tr>`;
 }
 
 function renderSaleItems() {
@@ -352,17 +486,14 @@ function updateSaleTotal() {
         return sum + (book ? Number(book.price) * Math.max(0, Number(row.querySelector("input").value) || 0) : 0);
     }, 0);
     document.getElementById("saleTotal").textContent = money(total);
-    const amountInput = document.getElementById("amountReceived");
-    const isCash = document.getElementById("paymentMethod").value === "Tunai";
-    amountInput.disabled = !isCash;
-    if (!isCash) amountInput.value = String(total);
-    document.getElementById("saleChange").textContent = money(Math.max(0, Number(amountInput.value) - total));
+    const amountReceived = Math.max(0, Number(document.getElementById("amountReceived").value) || 0);
+    document.getElementById("saleChange").textContent = money(Math.max(0, amountReceived - total));
 }
 
 function setView(name) {
     document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === `${name}View`));
     document.querySelectorAll(".nav-link").forEach(button => button.classList.toggle("active", button.dataset.view === name));
-    document.getElementById("pageLabel").textContent = { dashboard: "Dashboard", customers: "Pelanggan", books: "Katalog buku", sales: "Penjualan", supplierOrders: "Pemesanan Supplier" }[name];
+    document.getElementById("pageLabel").textContent = { dashboard: "Dashboard", customers: "Pelanggan", books: "Katalog buku", sales: "Penjualan", journal: "Jurnal Umum" }[name];
 }
 
 function openBookDialog(book) {
@@ -377,6 +508,7 @@ function openBookDialog(book) {
     document.getElementById("bookWarehouseLocation").value = book?.warehouse_location || "Gudang Utama";
     document.getElementById("bookPrice").value = book?.price ?? "";
     document.getElementById("bookStock").value = book?.stock ?? 0;
+    document.getElementById("bookStock").disabled = Boolean(book);
     document.getElementById("bookMinimum").value = book?.minimum_stock ?? 5;
     document.getElementById("bookDialog").showModal();
 }
@@ -390,42 +522,74 @@ function openCustomerDialog(customer) {
     document.getElementById("customerDialog").showModal();
 }
 
-function readOrderItems() {
-    return [...document.querySelectorAll(".order-item-row")].map(row => ({
+function readAdjustmentItems() {
+    return [...document.querySelectorAll(".adjustment-item-row")].map(row => ({
         bookId: row.querySelector("select").value,
         quantity: row.querySelector(".order-quantity").value,
         unitCost: row.querySelector(".order-cost").value
     }));
 }
 
-function renderOrderItems(items = readOrderItems()) {
-    const rows = items.length ? items : [{ bookId: "", quantity: "1", unitCost: "0" }];
-    const container = document.getElementById("orderItems");
-    container.innerHTML = rows.map(item => `<div class="order-item-row">
+function renderAdjustmentItems(items = readAdjustmentItems()) {
+    const rows = items.length ? items : [{ bookId: "", quantity: "1", unitCost: "" }];
+    const container = document.getElementById("adjustmentItems");
+    container.innerHTML = rows.map(item => `<div class="order-item-row adjustment-item-row">
         <select aria-label="Pilih buku"><option value="">Pilih buku</option>${state.books.map(book => `<option value="${book.id}" ${String(book.id) === String(item.bookId) ? "selected" : ""}>${escapeHtml(book.title)} · stok ${book.stock}</option>`).join("")}</select>
         <input class="order-quantity" type="number" min="1" step="1" value="${escapeHtml(item.quantity || 1)}" aria-label="Jumlah diterima">
-        <input class="order-cost" type="number" min="0" step="100" value="${escapeHtml(item.unitCost ?? 0)}" aria-label="Harga modal satuan">
+        <input class="order-cost" type="number" min="1" step="1" inputmode="numeric" value="${escapeHtml(item.unitCost ?? "")}" placeholder="Nilai/unit" aria-label="Nilai per buku">
         <button type="button" class="remove-item" aria-label="Hapus buku">×</button>
     </div>`).join("");
     container.querySelectorAll("input,select").forEach(control => control.addEventListener("input", updateOrderTotal));
+    container.querySelectorAll("select").forEach(select => select.addEventListener("change", event => {
+        const row = event.target.closest(".adjustment-item-row");
+        const adjustmentType = document.getElementById("adjustmentType").value;
+        if (adjustmentType === "damaged" || adjustmentType === "lost") {
+            const book = state.books.find(item => String(item.id) === event.target.value);
+            if (book) row.querySelector(".order-cost").value = Number(book.price) || 0;
+        }
+        updateOrderTotal();
+    }));
     container.querySelectorAll(".remove-item").forEach(button => button.addEventListener("click", () => {
-        const current = readOrderItems();
+        const current = readAdjustmentItems();
         current.splice([...container.querySelectorAll(".remove-item")].indexOf(button), 1);
-        renderOrderItems(current);
+        renderAdjustmentItems(current);
     }));
     updateOrderTotal();
 }
 
 function updateOrderTotal() {
-    const total = readOrderItems().reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unitCost) || 0), 0);
-    document.getElementById("orderTotal").textContent = money(total);
+    const total = readAdjustmentItems().reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unitCost) || 0), 0);
+    document.getElementById("adjustmentTotal").textContent = money(total);
 }
 
-function openSupplierOrderDialog() {
-    document.getElementById("supplierOrderForm").reset();
-    document.getElementById("orderWarehouse").value = "Gudang Utama";
-    renderOrderItems([{ bookId: "", quantity: "1", unitCost: "0" }]);
-    document.getElementById("supplierOrderDialog").showModal();
+function updateAdjustmentTypeFields() {
+    const isRestock = document.getElementById("adjustmentType").value === "restock";
+    document.getElementById("restockFields").hidden = !isRestock;
+    document.getElementById("adjustmentSupplierName").required = isRestock;
+    document.getElementById("adjustmentWarehouse").required = isRestock;
+    document.getElementById("adjustmentItemsLabel").textContent = isRestock
+        ? "JUMLAH DAN HARGA MODAL SATUAN"
+        : "JUMLAH DAN NILAI PEROLEHAN SATUAN";
+
+    document.querySelectorAll(".adjustment-item-row").forEach(row => {
+        const select = row.querySelector("select");
+        const costInput = row.querySelector(".order-cost");
+        const book = state.books.find(item => String(item.id) === select.value);
+        if (!isRestock && book) {
+            costInput.value = Number(book.price) || 0;
+        } else if (isRestock && costInput.value && !costInput.dataset.manualValue) {
+            costInput.value = "";
+        }
+    });
+    updateOrderTotal();
+}
+
+function openStockAdjustmentDialog() {
+    document.getElementById("stockAdjustmentForm").reset();
+    document.getElementById("adjustmentWarehouse").value = "Gudang Utama";
+    updateAdjustmentTypeFields();
+    renderAdjustmentItems([{ bookId: "", quantity: "1", unitCost: "" }]);
+    document.getElementById("stockAdjustmentDialog").showModal();
 }
 
 document.querySelectorAll(".nav-link").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
@@ -437,39 +601,129 @@ document.getElementById("refreshButton").addEventListener("click", () => loadDat
 document.getElementById("bookSearch").addEventListener("input", renderBooks);
 document.getElementById("categoryFilter").addEventListener("change", renderBooks);
 document.getElementById("addBookButton").addEventListener("click", () => openBookDialog());
+document.getElementById("updateStockButton").addEventListener("click", openStockAdjustmentDialog);
 document.getElementById("addCustomerButton").addEventListener("click", () => openCustomerDialog());
-document.getElementById("addSupplierOrderButton").addEventListener("click", () => openSupplierOrderDialog());
-document.getElementById("addOrderItem").addEventListener("click", () => renderOrderItems([...readOrderItems(), { bookId: "", quantity: "1", unitCost: "0" }]));
+document.getElementById("addAdjustmentItem").addEventListener("click", () => renderAdjustmentItems([...readAdjustmentItems(), { bookId: "", quantity: "1", unitCost: "" }]));
+document.getElementById("adjustmentType").addEventListener("change", updateAdjustmentTypeFields);
+document.getElementById("journalTypeFilter").addEventListener("change", renderJournalEntries);
+
+document.getElementById("addFinancialActivityButton").addEventListener("click", () => {
+    const form = document.getElementById("financialActivityForm");
+    form.reset();
+    const now = new Date();
+    document.getElementById("financialActivityDate").value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    document.getElementById("financialActivityDialog").showModal();
+});
 document.querySelector(".close-dialog").addEventListener("click", () => document.getElementById("bookDialog").close());
 document.getElementById("cancelBook").addEventListener("click", () => document.getElementById("bookDialog").close());
 document.querySelectorAll(".close-entity-dialog, .cancel-entity-dialog").forEach(button => button.addEventListener("click", () => button.closest("dialog").close()));
+document.querySelectorAll(".close-confirm-dialog").forEach(button => button.addEventListener("click", () => {
+    pendingDelete = null;
+    document.getElementById("confirmDialog").close();
+}));
+document.getElementById("confirmDeleteButton").addEventListener("click", async () => {
+    const action = pendingDelete;
+    pendingDelete = null;
+    document.getElementById("confirmDialog").close();
+    if (!action) return;
+    try { await action(); } catch (error) { showToast(error.message); }
+});
 document.getElementById("booksTable").addEventListener("click", event => {
     const button = event.target.closest("[data-edit-book]");
     if (button) openBookDialog(state.books.find(book => String(book.id) === button.dataset.editBook));
 });
 document.getElementById("customersTable").addEventListener("click", event => {
-    const button = event.target.closest("[data-edit-customer]");
-    if (button) openCustomerDialog(state.customers.find(item => item.customer_id === button.dataset.editCustomer));
+    const editButton = event.target.closest("[data-edit-customer]");
+    if (editButton) {
+        openCustomerDialog(state.customers.find(item => item.customer_id === editButton.dataset.editCustomer));
+        return;
+    }
+    const deleteButton = event.target.closest("[data-delete-customer]");
+    if (deleteButton) {
+        const customer = state.customers.find(item => item.customer_id === deleteButton.dataset.deleteCustomer);
+        openDeleteConfirmation({
+            title: `Hapus pelanggan ${customer?.name || "ini"}?`,
+            copy: "Pelanggan akan dihapus. Riwayat penjualan lama tetap tersimpan beserta nama pelanggan pada struk.",
+            onConfirm: async () => {
+                await api(`/customers/${deleteButton.dataset.deleteCustomer}`, { method: "DELETE" });
+                await loadData({ quiet: true });
+                showToast("Pelanggan berhasil dihapus; riwayat transaksi tetap aman.");
+            }
+        });
+    }
 });
 document.getElementById("salesHistory").addEventListener("click", event => {
     const button = event.target.closest("[data-print-sale]");
-    if (button) printSaleReceipt(state.sales.find(sale => sale.receipt_number === button.dataset.printSale));
+    if (button) {
+        const sale = state.sales.find(item => String(item.sale_id) === button.dataset.printSale);
+        if (sale) printSale(sale);
+    }
 });
-document.getElementById("paymentMethod").addEventListener("change", updateSaleTotal);
 document.getElementById("amountReceived").addEventListener("input", updateSaleTotal);
-document.getElementById("closeSaleSuccess").addEventListener("click", () => document.getElementById("saleSuccessDialog").close());
-document.getElementById("finishSale").addEventListener("click", () => document.getElementById("saleSuccessDialog").close());
-document.getElementById("printSuccessfulSale").addEventListener("click", () => {
-    const sale = state.sales.find(item => item.receipt_number === document.getElementById("saleSuccessDetails").dataset.receiptNumber);
-    if (!sale) return;
-    document.getElementById("saleSuccessDialog").close();
-    printSaleReceipt(sale);
+
+document.getElementById("journalEntriesTable").addEventListener("click", event => {
+    const reviseButton = event.target.closest("[data-revise-journal]");
+    if (reviseButton) {
+        const entry = state.journalEntries.find(item => String(item.journal_entry_id) === reviseButton.dataset.reviseJournal);
+        if (!entry) return;
+        document.getElementById("journalRevisionForm").reset();
+        document.getElementById("revisionJournalId").value = entry.journal_entry_id;
+        document.getElementById("revisionCurrentAmount").value = money(entry.amount);
+        document.getElementById("revisionAmount").value = entry.amount;
+        document.getElementById("revisionNote").value = entry.revision_note || "";
+        document.getElementById("journalRevisionDialog").showModal();
+        return;
+    }
+
+    const deleteButton = event.target.closest("[data-delete-journal]");
+    if (deleteButton) {
+        const entry = state.journalEntries.find(item => String(item.journal_entry_id) === deleteButton.dataset.deleteJournal);
+        const copy = entry?.entry_type === "sale"
+            ? "Entri penjualan akan dihapus permanen. Stok akan dikembalikan dan transaksi penjualan terkait juga akan dihapus."
+            : entry?.entry_type === "purchase" || entry?.entry_type === "restock"
+                ? "Entri pembelian akan dihapus permanen. Jumlah pembelian akan dikurangi dari stok katalog."
+                : entry?.entry_type === "damaged" || entry?.entry_type === "lost"
+                    ? "Entri kerusakan atau kehilangan akan dihapus. Jumlah stok yang berkurang akan dikembalikan."
+                    : "Entri jurnal keuangan akan dihapus permanen. Stok dan transaksi penjualan tidak akan berubah.";
+        openDeleteConfirmation({
+            title: `Hapus jurnal ${deleteButton.dataset.journalNumber}?`,
+            copy,
+            onConfirm: async () => {
+                await api(`/journal-entries/${deleteButton.dataset.deleteJournal}`, { method: "DELETE" });
+                await loadData({ quiet: true });
+                showToast("Entri jurnal berhasil dihapus.");
+            }
+        });
+    }
+});
+
+document.getElementById("journalRevisionForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const payload = {
+        journal_entry_id: Number(document.getElementById("revisionJournalId").value),
+        new_amount: Number(document.getElementById("revisionAmount").value),
+        revision_note: document.getElementById("revisionNote").value.trim()
+    };
+    if (!Number.isFinite(payload.new_amount) || payload.new_amount <= 0) {
+        showToast("Nominal revisi harus lebih dari nol.");
+        return;
+    }
+    if (!payload.revision_note) {
+        showToast("Alasan revisi wajib diisi.");
+        return;
+    }
+    try {
+        await api("/journal-revisions", { method: "POST", body: JSON.stringify(payload) });
+        await loadData({ quiet: true });
+        document.getElementById("journalRevisionDialog").close();
+        showToast("Nominal jurnal berhasil direvisi.");
+    } catch (error) { showToast(error.message); }
 });
 
 document.getElementById("bookForm").addEventListener("submit", async event => {
     event.preventDefault();
     const id = document.getElementById("bookId").value;
-    const payload = { title: document.getElementById("bookTitle").value.trim(), author: document.getElementById("bookAuthor").value.trim(), category_id: document.getElementById("bookCategory").value || null, publisher: document.getElementById("bookPublisher").value.trim(), warehouse_location: document.getElementById("bookWarehouseLocation").value.trim(), price: Number(document.getElementById("bookPrice").value), stock: Number(document.getElementById("bookStock").value), minimum_stock: Number(document.getElementById("bookMinimum").value) };
+    const payload = { title: document.getElementById("bookTitle").value.trim(), author: document.getElementById("bookAuthor").value.trim(), category_id: document.getElementById("bookCategory").value || null, publisher: document.getElementById("bookPublisher").value.trim(), warehouse_location: document.getElementById("bookWarehouseLocation").value.trim(), price: Number(document.getElementById("bookPrice").value), ...(id ? {} : { stock: Number(document.getElementById("bookStock").value) }), minimum_stock: Number(document.getElementById("bookMinimum").value) };
     try {
         await api(id ? `/books/${id}` : "/books", { method: id ? "PATCH" : "POST", body: JSON.stringify(payload) });
         await loadData({ quiet: true });
@@ -491,26 +745,58 @@ document.getElementById("customerForm").addEventListener("submit", async event =
     } catch (error) { showToast(error.message); }
 });
 
-document.getElementById("supplierOrderForm").addEventListener("submit", async event => {
+document.getElementById("stockAdjustmentForm").addEventListener("submit", async event => {
     event.preventDefault();
-    const items = readOrderItems().filter(item => item.bookId).map(item => ({ book_id: item.bookId, quantity: Number(item.quantity), unit_cost: Number(item.unitCost) }));
-    if (!items.length) { showToast("Pilih minimal satu buku untuk penerimaan."); return; }
-    if (items.some(item => !Number.isInteger(item.quantity) || item.quantity < 1 || !Number.isFinite(item.unit_cost) || item.unit_cost < 0)) {
-        showToast("Periksa jumlah buku dan harga modal pada pemesanan.");
+    const items = readAdjustmentItems().filter(item => item.bookId).map(item => ({ book_id: item.bookId, quantity: Number(item.quantity), unit_cost: Number(item.unitCost) }));
+    if (!items.length) { showToast("Pilih minimal satu buku untuk penyesuaian."); return; }
+    if (items.some(item => !Number.isInteger(item.quantity) || item.quantity < 1 || !Number.isFinite(item.unit_cost) || item.unit_cost <= 0)) {
+        showToast("Jumlah dan nilai perolehan setiap buku harus lebih dari nol.");
         return;
     }
+    const adjustmentType = document.getElementById("adjustmentType").value;
+    for (const item of items) {
+        const book = state.books.find(entry => String(entry.id) === String(item.book_id));
+        if (adjustmentType !== "restock" && item.quantity > Number(book.stock)) {
+            showToast(`Jumlah ${book.title} melebihi stok tersedia.`);
+            return;
+        }
+    }
     const payload = {
-        supplier_name: document.getElementById("orderSupplierName").value.trim(),
-        supplier_contact: document.getElementById("orderSupplierContact").value.trim(),
-        warehouse_location: document.getElementById("orderWarehouse").value.trim(),
-        notes: document.getElementById("orderNotes").value.trim(),
+        adjustment_type: adjustmentType,
+        supplier_name: document.getElementById("adjustmentSupplierName").value.trim(),
+        warehouse_location: document.getElementById("adjustmentWarehouse").value.trim(),
+        credit_account: document.getElementById("adjustmentCreditAccount").value,
+        notes: document.getElementById("adjustmentNotes").value.trim(),
         items
     };
     try {
-        await api("/supplier-orders", { method: "POST", body: JSON.stringify(payload) });
+        await api("/stock-adjustments", { method: "POST", body: JSON.stringify(payload) });
+        if (adjustmentType !== "restock") {
+        }
         await loadData({ quiet: true });
-        document.getElementById("supplierOrderDialog").close();
-        showToast("Penerimaan tersimpan; stok buku sudah ditambahkan.");
+        document.getElementById("stockAdjustmentDialog").close();
+        showToast("Mutasi stok tersimpan dan jurnal telah diperbarui.");
+    } catch (error) { showToast(error.message); }
+});
+
+document.getElementById("financialActivityForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const date = document.getElementById("financialActivityDate").value;
+    const payload = {
+        activity_type: document.getElementById("financialActivityType").value,
+        description: document.getElementById("financialActivityDescription").value.trim(),
+        amount: Number(document.getElementById("financialActivityAmount").value),
+        entry_date: date ? new Date(`${date}T00:00:00`).toISOString() : null
+    };
+    if (!Number.isFinite(payload.amount) || payload.amount <= 0) {
+        showToast("Nilai aktivitas harus lebih dari nol.");
+        return;
+    }
+    try {
+        await api("/journal-entries", { method: "POST", body: JSON.stringify(payload) });
+        await loadData({ quiet: true });
+        document.getElementById("financialActivityDialog").close();
+        showToast("Aktivitas keuangan tersimpan di jurnal.");
     } catch (error) { showToast(error.message); }
 });
 
@@ -530,23 +816,24 @@ document.getElementById("saleForm").addEventListener("submit", async event => {
         const book = state.books.find(entry => String(entry.id) === String(item.book_id));
         if (!Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > book.stock) { showToast(`Jumlah ${book.title} melebihi stok tersedia.`); return; }
     }
-    const total = items.reduce((sum, item) => sum + Number(state.books.find(book => String(book.id) === String(item.book_id)).price) * item.quantity, 0);
-    const amountReceived = Number(document.getElementById("amountReceived").value);
-    if (!Number.isFinite(amountReceived) || amountReceived < total) { showToast("Jumlah uang yang diterima harus sama atau lebih dari total transaksi."); return; }
     const customer = state.customers.find(item => item.customer_id === document.getElementById("saleCustomer").value);
+    const total = items.reduce((sum, item) => {
+        const book = state.books.find(entry => String(entry.id) === String(item.book_id));
+        return sum + Number(book.price) * item.quantity;
+    }, 0);
+    const amountReceived = Number(document.getElementById("amountReceived").value);
+    if (!Number.isFinite(amountReceived) || amountReceived < total) {
+        showToast("Jumlah uang diterima tidak boleh kurang dari total transaksi.");
+        return;
+    }
     const payload = { customer_id: customer?.customer_id || null, customer_name: customer?.name || null, customer_phone: customer?.phone || null, payment_method: document.getElementById("paymentMethod").value, amount_received: amountReceived, items };
     try {
-        const savedSale = await api("/sales", { method: "POST", body: JSON.stringify(payload) });
+        await api("/sales", { method: "POST", body: JSON.stringify(payload) });
         await loadData({ quiet: true });
         document.getElementById("saleForm").reset();
+        document.getElementById("saleItems").innerHTML = "";
         renderAll();
-        const sale = state.sales.find(item => item.receipt_number === savedSale?.receipt_number);
-        if (sale) {
-            const details = document.getElementById("saleSuccessDetails");
-            details.textContent = `${sale.receipt_number} · ${money(sale.total)} · ${sale.customer_name || "Pelanggan umum"}`;
-            details.dataset.receiptNumber = sale.receipt_number;
-            document.getElementById("saleSuccessDialog").showModal();
-        } else showToast("Penjualan tersimpan dan stok telah diperbarui.");
+        showToast("Penjualan tersimpan dan stok telah diperbarui.");
     } catch (error) { showToast(error.message); }
 });
 
