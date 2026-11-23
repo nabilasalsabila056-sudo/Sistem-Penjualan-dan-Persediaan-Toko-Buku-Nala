@@ -19,7 +19,7 @@ Toko Buku Nala adalah aplikasi web berbasis dashboard untuk mengelola operasiona
 Aplikasi dibangun menggunakan HTML5, CSS3, dan JavaScript untuk sisi frontend, serta Supabase (PostgreSQL) sebagai backend penyimpanan data. Sistem berjalan sepenuhnya di sisi klien dan terhubung langsung ke database Supabase melalui API.
 
 **Demo Langsung:**  
-https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/
+https://nabilasalsabila056-sudo.github.io/Sistem-Penjualan-dan-Persediaan-Toko-Buku-Nala/ 
 
 ---
 
