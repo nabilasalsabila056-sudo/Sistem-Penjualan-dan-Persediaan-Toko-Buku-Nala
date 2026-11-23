@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f4f1e9">
+    <meta name="theme-color" content="#ffee9d">
     <title>Nala — Toko Buku</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -17,7 +17,7 @@
                 <button class="nav-link" data-view="customers"><span class="nav-icon">♡</span> Pelanggan</button>
                 <button class="nav-link" data-view="books"><span class="nav-icon">▤</span> Katalog buku</button>
                 <button class="nav-link" data-view="sales"><span class="nav-icon">＋</span> Penjualan</button>
-                <button class="nav-link" data-view="supplierOrders"><span class="nav-icon">⇧</span> Pemesanan Supplier</button>
+                <button class="nav-link" data-view="journal"><span class="nav-icon">≡</span> Jurnal Umum</button>
             </nav>
             <div class="sidebar-note"><span class="live-dot"></span><div><strong id="connectionLabel">Menghubungkan database</strong><small>PostgreSQL · Supabase</small></div></div>
             <div class="sidebar-bottom">TOKO BUKU NALA <span>·</span> 2026</div>
@@ -28,21 +28,7 @@
                 <div class="topbar-actions"><span class="today-label" id="todayLabel"></span><button class="icon-button" id="refreshButton" type="button" aria-label="Muat ulang data" title="Muat ulang">↻</button><div class="user-badge"><span class="user-avatar">A</span><span><strong>Admin Nala</strong><small>Administrator</small></span></div></div>
             </header>
             <section class="view active" id="dashboardView">
-                <div class="page-intro">
-                    <div>
-                        <p class="overline" id="welcomeDate"></p>
-                        <h1>Ruang buku,<br><em>tertata baik.</em></h1>
-                        <p class="intro-copy">Pantau penjualan hari ini dan pastikan setiap cerita siap ditemukan.</p>
-                    </div>
-                    <div class="book-illustration" aria-hidden="true">
-                        <span class="book-spark spark-one">✦</span><span class="book-spark spark-two">✦</span>
-                        <div class="book-pals">
-                            <img class="story-pals" src="story-characters.svg" alt="">
-                        </div>
-                        <div class="book-shell"><div class="book-pages"><span class="book-leaf leaf-left"></span><span class="book-leaf leaf-right"></span><span class="book-leaf leaf-turn"></span><span class="book-spine"></span></div><span class="book-mark">NALA</span></div>
-                        <span class="book-shadow"></span>
-                    </div>
-                </div>
+                <div class="page-intro"><div class="page-intro-copy"><p class="overline" id="welcomeDate"></p><h1>Ruang buku,<br><em>tertata baik.</em></h1><p class="intro-copy">Pantau penjualan hari ini dan pastikan setiap cerita siap ditemukan.</p></div><div class="book-illustration" aria-hidden="true"><img src="story-characters.svg" alt=""></div></div>
                 <div class="metric-grid">
                     <article class="metric metric-primary"><div class="metric-top"><span>Penjualan hari ini</span><span class="metric-symbol">↗</span></div><strong id="todayRevenue">Rp0</strong><small id="todayCount">0 transaksi tercatat</small></article>
                     <article class="metric"><div class="metric-top"><span>Judul di katalog</span><span class="metric-symbol">▤</span></div><strong id="bookCount">0</strong><small>judul buku aktif</small></article>
@@ -68,9 +54,10 @@
                 <div class="dashboard-footer"><span>“Sebuah toko buku adalah mimpi yang punya alamat.”</span><span>DATA DIPERBARUI <b id="lastUpdated">--:--</b></span></div>
             </section>
             <section class="view" id="booksView">
-                <div class="section-title-row"><div><p class="overline">KOLEKSI NALA</p><h1>Katalog buku</h1><p class="intro-copy">Kelola judul, harga, dan jumlah persediaan.</p></div><button class="button button-dark" id="addBookButton" type="button"><span>＋</span> Tambah buku</button></div>
+                <div class="section-title-row"><div><p class="overline">KOLEKSI NALA</p><h1>Katalog buku</h1><p class="intro-copy">Kelola judul, harga, dan jumlah persediaan.</p></div><div class="catalog-actions"><button class="button button-quiet" id="updateStockButton" type="button">↻ Update stok</button><button class="button button-dark" id="addBookButton" type="button"><span>＋</span> Tambah buku</button></div></div>
                 <div class="toolbar"><label class="search-field"><span>⌕</span><input id="bookSearch" type="search" placeholder="Cari judul atau penulis" aria-label="Cari buku"></label><label class="filter-field"><span>Kategori</span><select id="categoryFilter"><option value="all">Semua kategori</option></select></label><span class="result-count" id="bookResultCount"></span></div>
                 <div class="table-frame"><table><thead><tr><th>JUDUL BUKU</th><th>PENERBIT</th><th>LOKASI STOK</th><th>KATEGORI</th><th>HARGA</th><th>STOK</th><th>STATUS</th><th></th></tr></thead><tbody id="booksTable"></tbody></table></div>
+                <section class="condition-panel"><div class="block-heading"><div><p class="overline">PENGENDALIAN FISIK</p><h2>Buku rusak & hilang</h2></div><span class="condition-count" id="conditionCount">0</span></div><div class="condition-list" id="conditionBookList"></div></section>
             </section>
             <section class="view" id="customersView">
                 <div class="section-title-row"><div><p class="overline">MASTER PEMBELI</p><h1>Pelanggan</h1><p class="intro-copy">Simpan data pelanggan untuk dipilih saat transaksi.</p></div><div class="customer-actions"><button class="button button-dark" id="addCustomerButton" type="button"><span>＋</span> Tambah pelanggan</button><button class="text-button" type="button" data-go="sales">Buat transaksi baru <span>→</span></button></div></div>
@@ -84,16 +71,17 @@
                         <div class="sale-items-heading"><span>BUKU PILIHAN</span><button type="button" class="text-button" id="addSaleItem">＋ Tambah judul</button></div><div id="saleItems" class="sale-items"></div>
                         <label class="field-label">Metode pembayaran<select id="paymentMethod" name="payment_method"><option>Tunai</option><option>Debit</option><option>QRIS</option></select></label>
                         <div class="sale-total"><span>Total transaksi</span><strong id="saleTotal">Rp0</strong></div>
-                        <label class="field-label">Jumlah uang diterima<input id="amountReceived" name="amount_received" type="number" min="0" step="100" value="0" required></label>
+                        <label class="field-label">Jumlah uang diterima<input id="amountReceived" type="number" min="0" step="100" value="0" required></label>
                         <div class="sale-change"><span>Kembalian</span><strong id="saleChange">Rp0</strong></div>
                         <button class="button button-dark submit-sale" type="submit"><span>✓</span> Simpan penjualan</button>
                     </form>
-                                        <section class="history-panel"><div class="block-heading"><div><p class="overline">ARSIP</p><h2>Riwayat transaksi</h2></div><div class="history-tools"><label class="receipt-width-label" for="receiptWidth">Kertas</label><select id="receiptWidth" aria-label="Lebar kertas struk"><option value="58">58 mm</option><option value="80" selected>80 mm</option></select><span class="history-count" id="salesCount">0</span></div></div><div class="history-list" id="salesHistory"></div></section>
+                    <section class="history-panel"><div class="block-heading"><div><p class="overline">ARSIP</p><h2>Riwayat transaksi</h2></div><div class="history-tools"><label for="receiptPaperWidth">Kertas</label><select id="receiptPaperWidth" aria-label="Lebar kertas struk"><option value="58">58 mm</option><option value="80" selected>80 mm</option></select><span class="history-count" id="salesCount">0</span></div></div><div class="history-list" id="salesHistory"></div></section>
                 </div>
             </section>
-            <section class="view" id="supplierOrdersView">
-                <div class="section-title-row"><div><p class="overline">STOK MASUK</p><h1>Pemesanan Supplier</h1><p class="intro-copy">Catat barang diterima; stok katalog akan bertambah otomatis.</p></div><button class="button button-dark" id="addSupplierOrderButton" type="button"><span>＋</span> Terima pemesanan</button></div>
-                <div class="table-frame entity-table"><table><thead><tr><th>NOMOR PESANAN</th><th>SUPPLIER</th><th>LOKASI</th><th>ITEM</th><th>TOTAL MODAL</th><th>DITERIMA</th><th>STATUS</th></tr></thead><tbody id="supplierOrdersTable"></tbody></table></div>
+            <section class="view" id="journalView">
+                <div class="section-title-row"><div><p class="overline">CATATAN KEUANGAN</p><h1>Jurnal Umum</h1><p class="intro-copy">Pantau transaksi penjualan, pembelian, dan mutasi persediaan dengan pencatatan debit-kredit.</p></div><div class="journal-actions"><button class="button button-dark" id="addFinancialActivityButton" type="button"><span>＋</span> Aktivitas keuangan</button></div></div>
+                <div class="journal-toolbar"><label for="journalTypeFilter">Jenis Aktivitas</label><select id="journalTypeFilter"><option value="all">Semua aktivitas</option><option value="sale">Penjualan</option><option value="purchase">Pembelian Persediaan</option><option value="damaged">Buku rusak</option><option value="lost">Buku hilang</option></select><span id="journalFilterCount">0 entri</span></div>
+                <div class="table-frame entity-table"><table><thead><tr><th>TANGGAL</th><th>NOMOR</th><th>JENIS / KETERANGAN</th><th>DEBIT</th><th>KREDIT</th><th>NILAI</th></tr></thead><tbody id="journalEntriesTable"></tbody></table></div>
             </section>
             <footer class="page-footer"><span>BUKU YANG BAIK SELALU MENEMUKAN PEMBACANYA.</span><span>SISTEM INFORMASI NALA</span></footer>
         </main>
@@ -106,11 +94,18 @@
     <dialog class="book-dialog entity-dialog" id="customerDialog"><form id="customerForm" method="dialog"><div class="dialog-heading"><div><p class="overline">MASTER PEMBELI</p><h2 id="customerDialogTitle">Tambah pelanggan</h2></div><button class="icon-button close-entity-dialog" type="button" aria-label="Tutup">×</button></div>
         <input type="hidden" id="customerId"><label class="field-label">Nama pelanggan<input id="customerName" required maxlength="140"></label><label class="field-label">Nomor telepon<input id="customerPhone" type="tel" maxlength="40"></label><div class="dialog-actions"><button class="button button-quiet cancel-entity-dialog" type="button">Batal</button><button class="button button-dark" type="submit">Simpan pelanggan</button></div>
     </form></dialog>
-    <dialog class="book-dialog entity-dialog" id="supplierOrderDialog"><form id="supplierOrderForm" method="dialog"><div class="dialog-heading"><div><p class="overline">PENERIMAAN STOK</p><h2>Terima pemesanan</h2></div><button class="icon-button close-entity-dialog" type="button" aria-label="Tutup">×</button></div>
-        <label class="field-label">Nama supplier<input id="orderSupplierName" required maxlength="140"></label><label class="field-label">Kontak supplier<input id="orderSupplierContact" maxlength="120"></label><label class="field-label">Lokasi gudang tujuan<input id="orderWarehouse" required maxlength="140" value="Gudang Utama"></label><div class="sale-items-heading"><span>BUKU DITERIMA</span><button type="button" class="text-button" id="addOrderItem">＋ Tambah buku</button></div><div id="orderItems" class="sale-items"></div><label class="field-label">Catatan<input id="orderNotes" maxlength="300"></label><div class="sale-total"><span>Total modal</span><strong id="orderTotal">Rp0</strong></div><div class="dialog-actions"><button class="button button-quiet cancel-entity-dialog" type="button">Batal</button><button class="button button-dark" type="submit">Simpan & tambah stok</button></div>
+    <dialog class="book-dialog entity-dialog" id="stockAdjustmentDialog"><form id="stockAdjustmentForm" method="dialog"><div class="dialog-heading"><div><p class="overline">MUTASI PERSEDIAAN</p><h2>Update stok</h2></div><button class="icon-button close-entity-dialog" type="button" aria-label="Tutup">×</button></div>
+        <label class="field-label">Jenis penyesuaian<select id="adjustmentType"><option value="restock">Pembelian Persediaan</option><option value="damaged">Buku rusak</option><option value="lost">Buku hilang</option></select></label>
+        <div id="restockFields"><label class="field-label">Nama supplier<input id="adjustmentSupplierName" maxlength="140"></label><label class="field-label">Lokasi gudang tujuan<input id="adjustmentWarehouse" maxlength="140" value="Gudang Utama"></label><label class="field-label">Akun kredit<select id="adjustmentCreditAccount"><option value="Kas">Kas (langsung dibayar)</option><option value="Utang Supplier">Utang supplier</option></select></label></div>
+        <div class="sale-items-heading"><span id="adjustmentItemsLabel">BUKU DAN NILAI SATUAN</span><button type="button" class="text-button" id="addAdjustmentItem">＋ Tambah buku</button></div><div id="adjustmentItems" class="sale-items"></div><label class="field-label">Catatan<input id="adjustmentNotes" maxlength="300"></label><div class="sale-total"><span>Total nilai mutasi</span><strong id="adjustmentTotal">Rp0</strong></div><div class="dialog-actions"><button class="button button-quiet cancel-entity-dialog" type="button">Batal</button><button class="button button-dark" type="submit">Simpan mutasi & jurnal</button></div>
     </form></dialog>
-    <dialog class="book-dialog receipt-success-dialog" id="saleSuccessDialog"><div class="dialog-heading"><div><p class="overline">TRANSAKSI TERSIMPAN</p><h2>Penjualan berhasil</h2></div><button class="icon-button" id="closeSaleSuccess" type="button" aria-label="Tutup">×</button></div><p class="receipt-success-copy" id="saleSuccessDetails"></p><div class="receipt-success-actions"><button class="button button-quiet" id="finishSale" type="button">Selesai</button><button class="button button-dark" id="printSuccessfulSale" type="button"><span aria-hidden="true">⎙</span> Cetak Struk</button></div></dialog>
-    <section id="printReceipt" aria-hidden="true"></section>
+    <dialog class="book-dialog entity-dialog" id="journalRevisionDialog"><form id="journalRevisionForm" method="dialog"><div class="dialog-heading"><div><p class="overline">KOREKSI NOMINAL</p><h2>Revisi jurnal</h2></div><button class="icon-button close-entity-dialog" type="button" aria-label="Tutup">×</button></div>
+        <input type="hidden" id="revisionJournalId"><label class="field-label">Nominal saat ini<input id="revisionCurrentAmount" type="text" readonly></label><label class="field-label">Nominal revisi (Rp)<input id="revisionAmount" type="number" min="1" step="1" inputmode="numeric" required></label><label class="field-label">Alasan revisi<input id="revisionNote" maxlength="240" required></label><div class="dialog-actions"><button class="button button-quiet cancel-entity-dialog" type="button">Batal</button><button class="button button-dark" type="submit">Simpan revisi</button></div>
+    </form></dialog>
+    <dialog class="book-dialog entity-dialog" id="financialActivityDialog"><form id="financialActivityForm" method="dialog"><div class="dialog-heading"><div><p class="overline">JURNAL BERPASANGAN</p><h2>Aktivitas keuangan</h2></div><button class="icon-button close-entity-dialog" type="button" aria-label="Tutup">×</button></div>
+        <label class="field-label">Jenis aktivitas<select id="financialActivityType"><option value="sale">Penjualan</option><option value="purchase">Pembelian Persediaan</option><option value="damaged">Buku rusak</option><option value="lost">Buku hilang</option></select></label><label class="field-label">Tanggal<input id="financialActivityDate" type="date" required></label><label class="field-label">Keterangan<input id="financialActivityDescription" required maxlength="240"></label><label class="field-label">Nilai (Rp)<input id="financialActivityAmount" type="number" min="1" step="100" required></label><div class="dialog-actions"><button class="button button-quiet cancel-entity-dialog" type="button">Batal</button><button class="button button-dark" type="submit">Simpan jurnal</button></div>
+    </form></dialog>
+    <dialog class="book-dialog confirm-dialog" id="confirmDialog"><form id="confirmForm" method="dialog"><div class="dialog-heading"><div><p class="overline">KONFIRMASI PENGHAPUSAN</p><h2 id="confirmDialogTitle">Hapus data?</h2></div><button class="icon-button close-confirm-dialog" type="button" aria-label="Tutup">×</button></div><p class="confirm-copy" id="confirmDialogCopy">Tindakan ini tidak dapat dibatalkan.</p><div class="dialog-actions"><button class="button button-quiet close-confirm-dialog" type="button">Batal</button><button class="button button-danger" id="confirmDeleteButton" type="button">Hapus</button></div></form></dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="supabase-config.js"></script>
     <script src="script.js" defer></script>
