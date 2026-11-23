@@ -1,4 +1,4 @@
 module.exports = {
-    supabaseUrl: process.env.SUPABASE_URL || "https://uzmlbxhufkukugwzmvia.supabase.co",
+    supabaseUrl: process.env.SUPABASE_URL || "https://inxjylmstdowrjalsabn.supabase.co",
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ""
 };
