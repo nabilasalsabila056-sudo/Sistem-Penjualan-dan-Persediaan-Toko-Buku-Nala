@@ -88,7 +88,10 @@ async function serveStatic(response, pathname) {
 async function handleApi(request, response, url) {
     const route = url.pathname.replace(/^\/api/, "");
     if (route === "/health" && request.method === "GET") {
-        return sendJson(response, 200, { status: "ok", supabaseConfigured: Boolean(supabaseUrl && serviceRoleKey) });
+        return sendJson(response, 200, {
+            status: "ok",
+            supabaseConfigured: Boolean(supabaseUrl && serviceRoleKey)
+        });
     }
 
     if (route === "/categories" && request.method === "GET") {
@@ -135,11 +138,9 @@ async function handleApi(request, response, url) {
         const data = await supabaseRequest("rpc/record_sale", {
             method: "POST",
             body: JSON.stringify({
-                p_customer_id: body.customer_id || null,
                 p_customer_name: body.customer_name || "Pelanggan umum",
                 p_customer_phone: body.customer_phone || null,
                 p_payment_method: body.payment_method,
-                p_amount_received: body.amount_received,
                 p_items: body.items
             })
         });
@@ -181,8 +182,7 @@ function normalizeBook(book) {
 
 function validateSale(sale) {
     if (!Array.isArray(sale.items) || sale.items.length === 0) throw new ApiError(400, "Pilih minimal satu buku untuk penjualan.");
-    if (!["Tunai", "Debit", "Transfer", "QRIS"].includes(sale.payment_method)) throw new ApiError(400, "Metode pembayaran tidak valid.");
-    if (!Number.isFinite(Number(sale.amount_received)) || Number(sale.amount_received) < 0) throw new ApiError(400, "Jumlah uang diterima tidak valid.");
+    if (!["Tunai", "Transfer", "QRIS"].includes(sale.payment_method)) throw new ApiError(400, "Metode pembayaran tidak valid.");
     if (sale.items.some(item => !String(item.book_id || "").trim() || !Number.isInteger(Number(item.quantity)) || Number(item.quantity) <= 0)) {
         throw new ApiError(400, "Buku atau jumlah pada transaksi tidak valid.");
     }
@@ -208,5 +208,8 @@ const server = http.createServer(async (request, response) => {
 
 server.listen(port, () => {
     console.log(`Toko Buku Nala berjalan di http://localhost:${port}`);
-    if (!serviceRoleKey) console.warn("Database belum dikonfigurasi. Atur SUPABASE_SERVICE_ROLE_KEY sebelum memakai aplikasi.");
+    if (!serviceRoleKey) {
+        console.warn("Database belum dikonfigurasi. Atur SUPABASE_URL dan SUPABASE_SERVICE_ROLE_KEY sebelum memakai aplikasi.");
+        console.warn("Pastikan frontend/supabase-config.js dan backend/config.js menunjuk ke proyek Supabase yang sama.");
+    }
 });
